@@ -1,19 +1,13 @@
 {{- if .Values.oauth2Proxy.enabled }}
-{{- $root := . }}
 {{- $fullname := include "continuum-sso.fullname" . }}
 {{- $service := .Values.oauth2Proxy.service }}
-
-{{- range $providerName, $provider := .Values.oauth2Proxy.providers }}
-{{- if $provider.enabled }}
----
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $fullname }}-oauth2-proxy-{{ $providerName }}
+  name: {{ $fullname }}-oauth2-proxy
   labels:
-    {{- include "continuum-sso.labels" $root | nindent 4 }}
+    {{- include "continuum-sso.labels" . | nindent 4 }}
     app.kubernetes.io/component: oauth2-proxy
-    app.kubernetes.io/oauth2-provider: {{ $providerName }}
 spec:
   type: {{ $service.type }}
   ports:
@@ -22,10 +16,6 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "continuum-sso.selectorLabels" $root | nindent 4 }}
+    {{- include "continuum-sso.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: oauth2-proxy
-    app.kubernetes.io/oauth2-provider: {{ $providerName }}
 {{- end }}
-{{- end }}
-{{- end }}
-
