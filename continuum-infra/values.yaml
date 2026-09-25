@@ -32,6 +32,13 @@ global:
   #     - name: my-registry-secret
   imagePullSecrets: []
 
+  # Image used by all init containers (wait-for-* readiness checks).
+  # Override repository and/or tag to pull from a private registry mirror.
+  initContainer:
+    image:
+      repository: busybox
+      tag: "1.36"
+
   # Labels applied to every resource created directly by this chart's own
   # templates (postgresql, kafka, kafkaUi, schemaRegistry, mosquitto, minio,
   # temporalSearchInit), merged underneath each component's own `labels`.
@@ -153,6 +160,13 @@ postgresql:
 cassandra:
   enabled: true
 
+  # ---- Image override (Bitnami subchart) ------------------------------------
+  # Uncomment to pull from a private registry:
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/cassandra
+  #   tag: ""            # defaults to subchart appVersion
+
   # Number of Cassandra nodes.
   replicaCount: 3
 
@@ -197,6 +211,13 @@ cassandra:
 # -----------------------------------------------------------------------------
 elasticsearch:
   enabled: true
+
+  # ---- Image override (Bitnami subchart) ------------------------------------
+  # Uncomment to pull from a private registry:
+  # image:
+  #   registry: docker.io
+  #   repository: bitnami/elasticsearch
+  #   tag: ""            # defaults to subchart appVersion
 
   # ---- Master nodes ---------------------------------------------------------
   master:
@@ -244,6 +265,21 @@ elasticsearch:
 # -----------------------------------------------------------------------------
 temporal:
   enabled: true
+
+  # ---- Image overrides (official Temporal subchart) -------------------------
+  # Uncomment to pull from a private registry:
+  # server:
+  #   image:
+  #     repository: temporalio/server
+  #     tag: ""          # defaults to subchart appVersion
+  # admintools:
+  #   image:
+  #     repository: temporalio/admin-tools
+  #     tag: ""
+  # web:
+  #   image:
+  #     repository: temporalio/web-ui
+  #     tag: ""
 
   # ---- Schema configuration ----------------------------------------------------
   schema:
@@ -624,8 +660,8 @@ minio:
   enabled: true
 
   image:
-    repository: minio/minio
-    tag: "RELEASE.2024-11-07T00-52-20Z"
+    repository: pgsty/silo
+    tag: RELEASE.2026-09-16T00-00-00Z-distroless
 
   # ---- Authentication -------------------------------------------------------
   auth:

@@ -6,6 +6,13 @@ global:
   imagePullSecrets: []
   continuumPlatformVersion: "0.0.15"
 
+  # Image used by all init containers (wait-for-* readiness checks).
+  # Override repository and/or tag to pull from a private registry mirror.
+  initContainer:
+    image:
+      repository: busybox
+      tag: "1.36"
+
   # Default nodeSelector applied to every pod in this chart.
   # A non-empty per-component nodeSelector overrides this.
   nodeSelector: {}

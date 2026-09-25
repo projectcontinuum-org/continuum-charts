@@ -32,7 +32,8 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-kafka
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command: ['sh', '-c', 'until nc -z {{ include "continuum-infra.kafka.fullname" . }}-0.{{ include "continuum-infra.kafka.fullname" . }}-headless 19092; do echo "Waiting for Kafka..."; sleep 5; done']
       containers:
         - name: schema-registry

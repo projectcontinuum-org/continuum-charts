@@ -27,7 +27,8 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-postgresql
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
@@ -41,7 +42,8 @@ spec:
               drop:
                 - ALL
         - name: wait-for-api-server
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
@@ -55,7 +57,8 @@ spec:
               drop:
                 - ALL
         - name: wait-for-cluster-manager
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
@@ -70,7 +73,8 @@ spec:
                 - ALL
         {{- if .Values.credentialsServer.enabled }}
         - name: wait-for-credentials-server
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c

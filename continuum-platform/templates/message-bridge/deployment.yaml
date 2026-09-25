@@ -27,7 +27,8 @@ spec:
           type: RuntimeDefault
       initContainers:
         - name: wait-for-kafka
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
@@ -44,7 +45,8 @@ spec:
               drop:
                 - ALL
         - name: wait-for-mosquitto
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
@@ -58,7 +60,8 @@ spec:
               drop:
                 - ALL
         - name: wait-for-postgresql
-          image: busybox:1.36
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           command:
             - sh
             - -c
