@@ -1,4 +1,4 @@
-{{- if .Values.credentialsServer.enabled }}
+{{- if .Values.continuum.credentialsServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: credentials-server
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.credentialsServer.replicas | default 1 }}
+  replicas: {{ .Values.continuum.credentialsServer.replicas | default 1 }}
   selector:
     matchLabels:
       app.kubernetes.io/component: credentials-server
@@ -33,7 +33,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.postgresql.host }} {{ .Values.infra.postgresql.port }}; do
+              until nc -z {{ .Values.continuum.infra.postgresql.host }} {{ .Values.continuum.infra.postgresql.port }}; do
                 echo "Waiting for PostgreSQL..."; sleep 5;
               done
           securityContext:
@@ -43,7 +43,7 @@ spec:
                 - ALL
       containers:
         - name: credentials-server
-          image: "{{ .Values.credentialsServer.image.repository }}:{{ .Values.credentialsServer.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
+          image: "{{ .Values.continuum.credentialsServer.image.repository }}:{{ .Values.continuum.credentialsServer.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -68,13 +68,13 @@ spec:
                   name: {{ include "continuum-platform.postgresql.secretName" . }}
                   key: password
             - name: CREDENTIALS_ENCRYPTION_MASTER_KEY
-              {{- if .Values.credentialsServer.existingEncryptionSecret }}
+              {{- if .Values.continuum.credentialsServer.existingEncryptionSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.credentialsServer.existingEncryptionSecret }}
+                  name: {{ .Values.continuum.credentialsServer.existingEncryptionSecret }}
                   key: master-key
               {{- else }}
-              value: {{ .Values.credentialsServer.encryption.masterKey | quote }}
+              value: {{ .Values.continuum.credentialsServer.encryption.masterKey | quote }}
               {{- end }}
           startupProbe:
             httpGet:
@@ -96,12 +96,12 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
           resources:
-            {{- toYaml .Values.credentialsServer.resources | nindent 12 }}
-      {{- with (.Values.credentialsServer.nodeSelector | default .Values.global.nodeSelector) }}
+            {{- toYaml .Values.continuum.credentialsServer.resources | nindent 12 }}
+      {{- with (.Values.continuum.credentialsServer.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.credentialsServer.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.credentialsServer.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

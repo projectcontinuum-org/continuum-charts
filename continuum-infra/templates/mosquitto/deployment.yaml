@@ -1,11 +1,11 @@
-{{- if .Values.mosquitto.enabled }}
+{{- if .Values.continuum.mosquitto.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "continuum-infra.mosquitto.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.mosquitto.labels.deployment) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.mosquitto.annotations.deployment)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.deployment)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
@@ -20,8 +20,8 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.mosquitto.labels.pod) | nindent 8 }}
-      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.mosquitto.annotations.pod)) }}
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.pod)) }}
       annotations:
         {{- nindent 8 . }}
       {{- end }}
@@ -35,7 +35,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mosquitto
-          image: "{{ .Values.mosquitto.image.repository }}:{{ .Values.mosquitto.image.tag }}"
+          image: "{{ .Values.continuum.mosquitto.image.repository }}:{{ .Values.continuum.mosquitto.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -43,10 +43,10 @@ spec:
               drop:
                 - ALL
           ports:
-            - containerPort: {{ .Values.mosquitto.config.tcpPort | default 1883 }}
+            - containerPort: {{ .Values.continuum.mosquitto.config.tcpPort | default 1883 }}
               name: mqtt
               protocol: TCP
-            - containerPort: {{ .Values.mosquitto.config.websocketPort | default 1884 }}
+            - containerPort: {{ .Values.continuum.mosquitto.config.websocketPort | default 1884 }}
               name: websocket
               protocol: TCP
           livenessProbe:
@@ -64,11 +64,11 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 5
           resources:
-            {{- toYaml .Values.mosquitto.resources | nindent 12 }}
+            {{- toYaml .Values.continuum.mosquitto.resources | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /mosquitto/config
-            {{- if .Values.mosquitto.persistence.enabled }}
+            {{- if .Values.continuum.mosquitto.persistence.enabled }}
             - name: data
               mountPath: /mosquitto/data
             - name: log
@@ -78,7 +78,7 @@ spec:
         - name: config
           configMap:
             name: {{ include "continuum-infra.mosquitto.fullname" . }}-config
-        {{- if .Values.mosquitto.persistence.enabled }}
+        {{- if .Values.continuum.mosquitto.persistence.enabled }}
         - name: data
           persistentVolumeClaim:
             claimName: {{ include "continuum-infra.mosquitto.fullname" . }}-data
@@ -86,11 +86,11 @@ spec:
           persistentVolumeClaim:
             claimName: {{ include "continuum-infra.mosquitto.fullname" . }}-log
         {{- end }}
-      {{- with (.Values.mosquitto.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.mosquitto.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.mosquitto.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.mosquitto.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

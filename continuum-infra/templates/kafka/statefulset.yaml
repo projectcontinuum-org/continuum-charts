@@ -1,17 +1,17 @@
-{{- if .Values.kafka.enabled }}
+{{- if .Values.continuum.kafka.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "continuum-infra.kafka.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.kafka.labels.statefulSet) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.kafka.annotations.statefulSet)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.continuum.kafka.labels.statefulSet) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafka.annotations.statefulSet)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
 spec:
   serviceName: {{ include "continuum-infra.kafka.fullname" . }}-headless
-  replicas: {{ .Values.kafka.replicas }}
+  replicas: {{ .Values.continuum.kafka.replicas }}
   podManagementPolicy: Parallel
   selector:
     matchLabels:
@@ -20,8 +20,8 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.kafka.labels.pod) | nindent 8 }}
-      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.kafka.annotations.pod)) }}
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.continuum.kafka.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafka.annotations.pod)) }}
       annotations:
         {{- nindent 8 . }}
       {{- end }}
@@ -30,10 +30,10 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      {{- if .Values.kafka.topologySpreadConstraints.enabled }}
+      {{- if .Values.continuum.kafka.topologySpreadConstraints.enabled }}
       topologySpreadConstraints:
-        - maxSkew: {{ .Values.kafka.topologySpreadConstraints.maxSkew | default 1 }}
-          topologyKey: {{ .Values.kafka.topologySpreadConstraints.topologyKey | default "kubernetes.io/hostname" }}
+        - maxSkew: {{ .Values.continuum.kafka.topologySpreadConstraints.maxSkew | default 1 }}
+          topologyKey: {{ .Values.continuum.kafka.topologySpreadConstraints.topologyKey | default "kubernetes.io/hostname" }}
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
@@ -42,7 +42,7 @@ spec:
       {{- end }}
       containers:
         - name: kafka
-          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag }}"
+          image: "{{ .Values.continuum.kafka.image.repository }}:{{ .Values.continuum.kafka.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             runAsUser: 0
@@ -64,7 +64,7 @@ spec:
               export KAFKA_NODE_ID=$((${HOSTNAME##*-} + 1))
               export KAFKA_ADVERTISED_LISTENERS="BROKER://{{ include "continuum-infra.kafka.fullname" . }}-${HOSTNAME##*-}.{{ include "continuum-infra.kafka.fullname" . }}-headless:19092"
               {{- $fullname := include "continuum-infra.kafka.fullname" . }}
-              {{- $replicas := int .Values.kafka.replicas }}
+              {{- $replicas := int .Values.continuum.kafka.replicas }}
               export KAFKA_CONTROLLER_QUORUM_VOTERS="{{ range $i := until $replicas }}{{ if $i }},{{ end }}{{ add $i 1 }}@{{ $fullname }}-{{ $i }}.{{ $fullname }}-headless:9093{{ end }}"
               exec /etc/confluent/docker/run
           env:
@@ -79,32 +79,32 @@ spec:
             - name: KAFKA_PROCESS_ROLES
               value: "controller,broker"
             - name: TOPIC_AUTO_CREATE
-              value: {{ .Values.kafka.config.autoCreateTopics | default "true" | quote }}
+              value: {{ .Values.continuum.kafka.config.autoCreateTopics | default "true" | quote }}
             - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
-              value: "http://{{ include "continuum-infra.schema-registry.fullname" . }}:{{ .Values.schemaRegistry.service.port | default 8080 }}"
+              value: "http://{{ include "continuum-infra.schema-registry.fullname" . }}:{{ .Values.continuum.schemaRegistry.service.port | default 8080 }}"
             - name: CLUSTER_ID
-              value: {{ .Values.kafka.clusterId | quote }}
+              value: {{ .Values.continuum.kafka.clusterId | quote }}
             - name: KAFKA_LOG_RETENTION_HOURS
-              value: {{ .Values.kafka.config.logRetentionHours | default 168 | quote }}
-            {{- if .Values.kafka.config.defaultReplicationFactor }}
+              value: {{ .Values.continuum.kafka.config.logRetentionHours | default 168 | quote }}
+            {{- if .Values.continuum.kafka.config.defaultReplicationFactor }}
             - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-              value: {{ .Values.kafka.config.defaultReplicationFactor | quote }}
+              value: {{ .Values.continuum.kafka.config.defaultReplicationFactor | quote }}
             {{- end }}
-            {{- if .Values.kafka.config.minInsyncReplicas }}
+            {{- if .Values.continuum.kafka.config.minInsyncReplicas }}
             - name: KAFKA_MIN_INSYNC_REPLICAS
-              value: {{ .Values.kafka.config.minInsyncReplicas | quote }}
+              value: {{ .Values.continuum.kafka.config.minInsyncReplicas | quote }}
             {{- end }}
-            {{- if .Values.kafka.config.offsetsTopicReplicationFactor }}
+            {{- if .Values.continuum.kafka.config.offsetsTopicReplicationFactor }}
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-              value: {{ .Values.kafka.config.offsetsTopicReplicationFactor | quote }}
+              value: {{ .Values.continuum.kafka.config.offsetsTopicReplicationFactor | quote }}
             {{- end }}
-            {{- if .Values.kafka.config.transactionStateLogReplicationFactor }}
+            {{- if .Values.continuum.kafka.config.transactionStateLogReplicationFactor }}
             - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
-              value: {{ .Values.kafka.config.transactionStateLogReplicationFactor | quote }}
+              value: {{ .Values.continuum.kafka.config.transactionStateLogReplicationFactor | quote }}
             {{- end }}
-            {{- if .Values.kafka.config.transactionStateLogMinIsr }}
+            {{- if .Values.continuum.kafka.config.transactionStateLogMinIsr }}
             - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
-              value: {{ .Values.kafka.config.transactionStateLogMinIsr | quote }}
+              value: {{ .Values.continuum.kafka.config.transactionStateLogMinIsr | quote }}
             {{- end }}
           livenessProbe:
             exec:
@@ -137,15 +137,15 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 30
           resources:
-            {{- toYaml .Values.kafka.resources | nindent 12 }}
+            {{- toYaml .Values.continuum.kafka.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/kafka/data
-      {{- with (.Values.kafka.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.kafka.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.kafka.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.kafka.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -160,5 +160,5 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.kafka.persistence.size | default "20Gi" }}
+            storage: {{ .Values.continuum.kafka.persistence.size | default "20Gi" }}
 {{- end }}

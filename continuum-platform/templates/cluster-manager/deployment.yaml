@@ -1,4 +1,4 @@
-{{- if .Values.clusterManager.enabled }}
+{{- if .Values.continuum.clusterManager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: cluster-manager
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.clusterManager.replicas | default 1 }}
+  replicas: {{ .Values.continuum.clusterManager.replicas | default 1 }}
   selector:
     matchLabels:
       app.kubernetes.io/component: cluster-manager
@@ -34,7 +34,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.postgresql.host }} {{ .Values.infra.postgresql.port }}; do
+              until nc -z {{ .Values.continuum.infra.postgresql.host }} {{ .Values.continuum.infra.postgresql.port }}; do
                 echo "Waiting for PostgreSQL..."; sleep 5;
               done
           securityContext:
@@ -44,7 +44,7 @@ spec:
                 - ALL
       containers:
         - name: cluster-manager
-          image: "{{ .Values.clusterManager.image.repository }}:{{ .Values.clusterManager.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
+          image: "{{ .Values.continuum.clusterManager.image.repository }}:{{ .Values.continuum.clusterManager.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -69,18 +69,18 @@ spec:
                   name: {{ include "continuum-platform.postgresql.secretName" . }}
                   key: password
             - name: WORKBENCH_DEFAULT_IMAGE
-              value: {{ .Values.clusterManager.workbench.defaultImage | quote }}
+              value: {{ .Values.continuum.clusterManager.workbench.defaultImage | quote }}
             - name: WORKBENCH_NAMESPACE
-              value: {{ .Values.clusterManager.workbench.namespace | quote }}
+              value: {{ .Values.continuum.clusterManager.workbench.namespace | quote }}
             - name: WORKBENCH_IMAGE_PULL_POLICY
-              value: {{ .Values.clusterManager.workbench.imagePullPolicy | default "IfNotPresent" | quote }}
-            {{- if .Values.clusterManager.workbench.overlays.enabled }}
+              value: {{ .Values.continuum.clusterManager.workbench.imagePullPolicy | default "IfNotPresent" | quote }}
+            {{- if .Values.continuum.clusterManager.workbench.overlays.enabled }}
             - name: OVERLAY_ENABLED
               value: "true"
             - name: OVERLAY_PATH
               value: "/etc/continuum/overlays/workbench"
             {{- end }}
-          {{- if .Values.clusterManager.workbench.overlays.enabled }}
+          {{- if .Values.continuum.clusterManager.workbench.overlays.enabled }}
           volumeMounts:
             - name: overlays
               mountPath: /etc/continuum/overlays/workbench
@@ -106,18 +106,18 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
           resources:
-            {{- toYaml .Values.clusterManager.resources | nindent 12 }}
-      {{- if .Values.clusterManager.workbench.overlays.enabled }}
+            {{- toYaml .Values.continuum.clusterManager.resources | nindent 12 }}
+      {{- if .Values.continuum.clusterManager.workbench.overlays.enabled }}
       volumes:
         - name: overlays
           configMap:
             name: {{ include "continuum-platform.cluster-manager.fullname" . }}-overlays
       {{- end }}
-      {{- with (.Values.clusterManager.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.clusterManager.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.clusterManager.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.clusterManager.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

@@ -20,27 +20,135 @@ global:
   imagePullPolicy: IfNotPresent
 
 # -----------------------------------------------------------------------------
-# PostgreSQL
+# Continuum — values owned by this chart's own templates
 # -----------------------------------------------------------------------------
-postgresql:
-  auth:
-    postgresPassword: "dev-postgres-pass"
-    continuumPassword: "dev-continuum-pass"
+continuum:
 
-  persistence:
-    size: 2Gi
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  postgresql:
+    auth:
+      postgresPassword: "dev-postgres-pass"
+      continuumPassword: "dev-continuum-pass"
 
-  # Increase max_connections for dev environment
-  # Temporal uses ~60 connections, Continuum uses ~30, Keycloak needs ~20
-  maxConnections: 200
+    persistence:
+      size: 2Gi
 
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+    # Increase max_connections for dev environment
+    # Temporal uses ~60 connections, Continuum uses ~30, Keycloak needs ~20
+    maxConnections: 200
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # ---------------------------------------------------------------------------
+  # Temporal Search Attribute Init
+  # ---------------------------------------------------------------------------
+  temporalSearchInit:
+    enabled: true
+
+  # ---------------------------------------------------------------------------
+  # Kafka
+  # ---------------------------------------------------------------------------
+  kafka:
+    # Single broker is sufficient for dev.
+    replicas: 1
+
+    persistence:
+      size: 5Gi
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+
+    podDisruptionBudget:
+      enabled: false
+
+    topologySpreadConstraints:
+      enabled: false
+
+    # Set replication factors to 1 for single-broker dev setup
+    config:
+      autoCreateTopics: "true"
+      logRetentionHours: 168
+      defaultReplicationFactor: "1"
+      minInsyncReplicas: "1"
+      offsetsTopicReplicationFactor: "1"
+      transactionStateLogReplicationFactor: "1"
+      transactionStateLogMinIsr: "1"
+
+  # ---------------------------------------------------------------------------
+  # Schema Registry
+  # ---------------------------------------------------------------------------
+  schemaRegistry:
+    replicas: 1
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  # ---------------------------------------------------------------------------
+  # Kafka UI
+  # ---------------------------------------------------------------------------
+  kafkaUi:
+    replicas: 1
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+
+  # ---------------------------------------------------------------------------
+  # Mosquitto
+  # ---------------------------------------------------------------------------
+  mosquitto:
+    persistence:
+      size: 256Mi
+      logSize: 128Mi
+
+    resources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+
+  # ---------------------------------------------------------------------------
+  # MinIO
+  # ---------------------------------------------------------------------------
+  minio:
+    auth:
+      rootUser: "dev-minio-root"
+      rootPassword: "dev-minio-secret"
+
+    persistence:
+      size: 5Gi
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
 # -----------------------------------------------------------------------------
 # Cassandra — disabled in dev (Temporal uses PostgreSQL instead)
@@ -129,107 +237,3 @@ temporal:
 
   web:
     enabled: true
-
-# -----------------------------------------------------------------------------
-# Temporal Search Attribute Init
-# -----------------------------------------------------------------------------
-temporalSearchInit:
-  enabled: true
-
-# -----------------------------------------------------------------------------
-# Kafka
-# -----------------------------------------------------------------------------
-kafka:
-  # Single broker is sufficient for dev.
-  replicas: 1
-
-  persistence:
-    size: 5Gi
-
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: "1"
-      memory: 1Gi
-
-  podDisruptionBudget:
-    enabled: false
-
-  topologySpreadConstraints:
-    enabled: false
-
-  # Set replication factors to 1 for single-broker dev setup
-  config:
-    autoCreateTopics: "true"
-    logRetentionHours: 168
-    defaultReplicationFactor: "1"
-    minInsyncReplicas: "1"
-    offsetsTopicReplicationFactor: "1"
-    transactionStateLogReplicationFactor: "1"
-    transactionStateLogMinIsr: "1"
-
-# -----------------------------------------------------------------------------
-# Schema Registry
-# -----------------------------------------------------------------------------
-schemaRegistry:
-  replicas: 1
-
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 250m
-      memory: 256Mi
-
-# -----------------------------------------------------------------------------
-# Kafka UI
-# -----------------------------------------------------------------------------
-kafkaUi:
-  replicas: 1
-
-  resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
-    limits:
-      cpu: 250m
-      memory: 256Mi
-
-# -----------------------------------------------------------------------------
-# Mosquitto
-# -----------------------------------------------------------------------------
-mosquitto:
-  persistence:
-    size: 256Mi
-    logSize: 128Mi
-
-  resources:
-    requests:
-      cpu: 25m
-      memory: 32Mi
-    limits:
-      cpu: 100m
-      memory: 64Mi
-
-# -----------------------------------------------------------------------------
-# MinIO
-# -----------------------------------------------------------------------------
-minio:
-  auth:
-    rootUser: "dev-minio-root"
-    rootPassword: "dev-minio-secret"
-
-  persistence:
-    size: 5Gi
-
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-

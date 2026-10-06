@@ -1,4 +1,4 @@
-{{- if .Values.credentialsServer.enabled }}
+{{- if .Values.continuum.credentialsServer.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.credentialsServer.service.port | default 8080 }}
+    - port: {{ .Values.continuum.credentialsServer.service.port | default 8080 }}
       targetPort: http
       protocol: TCP
       name: http

@@ -1,18 +1,18 @@
-{{- if .Values.postgresql.enabled }}
+{{- if .Values.continuum.postgresql.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "continuum-infra.postgresql.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.postgresql.labels.service) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.postgresql.annotations.service)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.continuum.postgresql.labels.service) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.postgresql.annotations.service)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.postgresql.service.port | default 5432 }}
+    - port: {{ .Values.continuum.postgresql.service.port | default 5432 }}
       targetPort: postgresql
       protocol: TCP
       name: postgresql

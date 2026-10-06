@@ -1,4 +1,4 @@
-{{- if and .Values.featureBase.enabled .Values.featureBase.autoscaling.enabled }}
+{{- if and .Values.continuum.featureBase.enabled .Values.continuum.featureBase.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -11,13 +11,13 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "continuum-platform.feature-base.fullname" . }}
-  minReplicas: {{ .Values.featureBase.autoscaling.minReplicas | default 1 }}
-  maxReplicas: {{ .Values.featureBase.autoscaling.maxReplicas | default 5 }}
+  minReplicas: {{ .Values.continuum.featureBase.autoscaling.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.continuum.featureBase.autoscaling.maxReplicas | default 5 }}
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.featureBase.autoscaling.targetCPUUtilizationPercentage | default 75 }}
+          averageUtilization: {{ .Values.continuum.featureBase.autoscaling.targetCPUUtilizationPercentage | default 75 }}
 {{- end }}

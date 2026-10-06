@@ -1,16 +1,16 @@
-{{- if .Values.schemaRegistry.enabled }}
+{{- if .Values.continuum.schemaRegistry.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "continuum-infra.schema-registry.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.schemaRegistry.labels.deployment) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.schemaRegistry.annotations.deployment)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.continuum.schemaRegistry.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.schemaRegistry.annotations.deployment)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
 spec:
-  replicas: {{ .Values.schemaRegistry.replicas | default 1 }}
+  replicas: {{ .Values.continuum.schemaRegistry.replicas | default 1 }}
   selector:
     matchLabels:
       app.kubernetes.io/component: schema-registry
@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.schemaRegistry.labels.pod) | nindent 8 }}
-      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.schemaRegistry.annotations.pod)) }}
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.continuum.schemaRegistry.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.schemaRegistry.annotations.pod)) }}
       annotations:
         {{- nindent 8 . }}
       {{- end }}
@@ -37,7 +37,7 @@ spec:
           command: ['sh', '-c', 'until nc -z {{ include "continuum-infra.kafka.fullname" . }}-0.{{ include "continuum-infra.kafka.fullname" . }}-headless 19092; do echo "Waiting for Kafka..."; sleep 5; done']
       containers:
         - name: schema-registry
-          image: "{{ .Values.schemaRegistry.image.repository }}:{{ .Values.schemaRegistry.image.tag }}"
+          image: "{{ .Values.continuum.schemaRegistry.image.repository }}:{{ .Values.continuum.schemaRegistry.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -45,7 +45,7 @@ spec:
               drop:
                 - ALL
           ports:
-            - containerPort: {{ .Values.schemaRegistry.service.port | default 8080 }}
+            - containerPort: {{ .Values.continuum.schemaRegistry.service.port | default 8080 }}
               name: http
               protocol: TCP
           env:
@@ -56,7 +56,7 @@ spec:
             - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
               value: {{ include "continuum-infra.kafka.brokerList" . | quote }}
             - name: SCHEMA_REGISTRY_LISTENERS
-              value: "http://0.0.0.0:{{ .Values.schemaRegistry.service.port | default 8080 }}"
+              value: "http://0.0.0.0:{{ .Values.continuum.schemaRegistry.service.port | default 8080 }}"
           livenessProbe:
             httpGet:
               path: /subjects
@@ -74,12 +74,12 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 10
           resources:
-            {{- toYaml .Values.schemaRegistry.resources | nindent 12 }}
-      {{- with (.Values.schemaRegistry.nodeSelector | default .Values.global.nodeSelector) }}
+            {{- toYaml .Values.continuum.schemaRegistry.resources | nindent 12 }}
+      {{- with (.Values.continuum.schemaRegistry.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.schemaRegistry.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.schemaRegistry.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

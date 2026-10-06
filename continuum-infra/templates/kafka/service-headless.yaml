@@ -1,11 +1,11 @@
-{{- if .Values.kafka.enabled }}
+{{- if .Values.continuum.kafka.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "continuum-infra.kafka.fullname" . }}-headless
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.kafka.labels.serviceHeadless) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.kafka.annotations.serviceHeadless)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.continuum.kafka.labels.serviceHeadless) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafka.annotations.serviceHeadless)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}

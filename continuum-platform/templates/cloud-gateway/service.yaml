@@ -1,4 +1,4 @@
-{{- if .Values.cloudGateway.enabled }}
+{{- if .Values.continuum.cloudGateway.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.cloudGateway.service.port | default 8080 }}
+    - port: {{ .Values.continuum.cloudGateway.service.port | default 8080 }}
       targetPort: http
       protocol: TCP
       name: http

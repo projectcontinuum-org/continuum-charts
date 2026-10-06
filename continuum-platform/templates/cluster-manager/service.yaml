@@ -1,4 +1,4 @@
-{{- if .Values.clusterManager.enabled }}
+{{- if .Values.continuum.clusterManager.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.clusterManager.service.port | default 8080 }}
+    - port: {{ .Values.continuum.clusterManager.service.port | default 8080 }}
       targetPort: http
       protocol: TCP
       name: http

@@ -1,4 +1,4 @@
-{{- if .Values.orchestrationService.enabled }}
+{{- if .Values.continuum.orchestrationService.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.orchestrationService.service.port | default 8080 }}
+    - port: {{ .Values.continuum.orchestrationService.service.port | default 8080 }}
       targetPort: http
       protocol: TCP
       name: http

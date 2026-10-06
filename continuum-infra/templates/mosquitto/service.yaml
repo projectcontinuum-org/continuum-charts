@@ -1,22 +1,22 @@
-{{- if .Values.mosquitto.enabled }}
+{{- if .Values.continuum.mosquitto.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "continuum-infra.mosquitto.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.mosquitto.labels.service) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.mosquitto.annotations.service)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.service) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.service)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.mosquitto.config.tcpPort | default 1883 }}
+    - port: {{ .Values.continuum.mosquitto.config.tcpPort | default 1883 }}
       targetPort: mqtt
       protocol: TCP
       name: mqtt
-    - port: {{ .Values.mosquitto.config.websocketPort | default 1884 }}
+    - port: {{ .Values.continuum.mosquitto.config.websocketPort | default 1884 }}
       targetPort: websocket
       protocol: TCP
       name: websocket

@@ -43,7 +43,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Full label set for a resource belonging to a given component, with global and
 per-service overrides layered on top.
 Merge precedence (highest wins): extra > global.labels > component + base labels.
-Usage: {{ include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.kafka.labels) | nindent 4 }}
+Usage: {{ include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.continuum.kafka.labels) | nindent 4 }}
 */}}
 {{- define "continuum-infra.componentLabels" -}}
 {{- $result := dict -}}
@@ -58,7 +58,7 @@ Usage: {{ include "continuum-infra.componentLabels" (dict "context" $ "component
 Full annotation set for a resource, with global and per-service overrides
 layered on top. Renders to nothing if there are no annotations to set.
 Merge precedence (highest wins): extra > global.annotations.
-Usage: {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.kafka.annotations)) }}
+Usage: {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafka.annotations)) }}
 annotations:
   {{- nindent 4 . }}
 {{- end }}
@@ -101,16 +101,16 @@ annotations:
 {{/* ======================== Secret names ======================== */}}
 
 {{- define "continuum-infra.postgresql.secretName" -}}
-{{- if .Values.postgresql.auth.existingSecret -}}
-{{- .Values.postgresql.auth.existingSecret -}}
+{{- if .Values.continuum.postgresql.auth.existingSecret -}}
+{{- .Values.continuum.postgresql.auth.existingSecret -}}
 {{- else -}}
 {{- include "continuum-infra.postgresql.fullname" . -}}-secret
 {{- end -}}
 {{- end }}
 
 {{- define "continuum-infra.minio.secretName" -}}
-{{- if .Values.minio.auth.existingSecret -}}
-{{- .Values.minio.auth.existingSecret -}}
+{{- if .Values.continuum.minio.auth.existingSecret -}}
+{{- .Values.continuum.minio.auth.existingSecret -}}
 {{- else -}}
 {{- include "continuum-infra.minio.fullname" . -}}-secret
 {{- end -}}
@@ -124,7 +124,7 @@ Format: PLAINTEXT://kafka-0.kafka-headless:19092,PLAINTEXT://kafka-1.kafka-headl
 */}}
 {{- define "continuum-infra.kafka.brokerList" -}}
 {{- $fullname := include "continuum-infra.kafka.fullname" . -}}
-{{- $replicas := int .Values.kafka.replicas -}}
+{{- $replicas := int .Values.continuum.kafka.replicas -}}
 {{- $brokers := list -}}
 {{- range $i := until $replicas -}}
 {{- $brokers = append $brokers (printf "PLAINTEXT://%s-%d.%s-headless:19092" $fullname $i $fullname) -}}

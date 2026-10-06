@@ -42,30 +42,30 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{/* ======================== Infra service references ======================== */}}
 
 {{- define "continuum-platform.infra.temporal.address" -}}
-{{- .Values.infra.temporal.host -}}:{{- .Values.infra.temporal.port -}}
+{{- .Values.continuum.infra.temporal.host -}}:{{- .Values.continuum.infra.temporal.port -}}
 {{- end }}
 
 {{- define "continuum-platform.infra.db.url" -}}
-jdbc:postgresql://{{ .Values.infra.postgresql.host }}:{{ .Values.infra.postgresql.port }}/{{ .Values.infra.postgresql.database }}
+jdbc:postgresql://{{ .Values.continuum.infra.postgresql.host }}:{{ .Values.continuum.infra.postgresql.port }}/{{ .Values.continuum.infra.postgresql.database }}
 {{- end }}
 
 {{- define "continuum-platform.infra.mosquitto.uri" -}}
-tcp://{{ .Values.infra.mosquitto.host }}:{{ .Values.infra.mosquitto.port }}
+tcp://{{ .Values.continuum.infra.mosquitto.host }}:{{ .Values.continuum.infra.mosquitto.port }}
 {{- end }}
 
 {{/* ======================== Secret names ======================== */}}
 
 {{- define "continuum-platform.postgresql.secretName" -}}
-{{- if .Values.secrets.existingPostgresqlSecret -}}
-{{- .Values.secrets.existingPostgresqlSecret -}}
+{{- if .Values.continuum.secrets.existingPostgresqlSecret -}}
+{{- .Values.continuum.secrets.existingPostgresqlSecret -}}
 {{- else -}}
 {{- include "continuum-platform.fullname" . -}}-postgresql-secret
 {{- end -}}
 {{- end }}
 
 {{- define "continuum-platform.minio.secretName" -}}
-{{- if .Values.secrets.existingMinioSecret -}}
-{{- .Values.secrets.existingMinioSecret -}}
+{{- if .Values.continuum.secrets.existingMinioSecret -}}
+{{- .Values.continuum.secrets.existingMinioSecret -}}
 {{- else -}}
 {{- include "continuum-platform.fullname" . -}}-minio-secret
 {{- end -}}

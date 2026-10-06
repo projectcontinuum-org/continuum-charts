@@ -1,4 +1,4 @@
-{{- if .Values.messageBridge.enabled }}
+{{- if .Values.continuum.messageBridge.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.messageBridge.service.port | default 8080 }}
+    - port: {{ .Values.continuum.messageBridge.service.port | default 8080 }}
       targetPort: http
       protocol: TCP
       name: http

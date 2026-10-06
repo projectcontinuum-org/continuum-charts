@@ -1,4 +1,4 @@
-{{- if .Values.apiServer.enabled }}
+{{- if .Values.continuum.apiServer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: api-server
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.apiServer.replicas | default 1 }}
+  replicas: {{ .Values.continuum.apiServer.replicas | default 1 }}
   selector:
     matchLabels:
       app.kubernetes.io/component: api-server
@@ -33,7 +33,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.temporal.host }} {{ .Values.infra.temporal.port }}; do
+              until nc -z {{ .Values.continuum.infra.temporal.host }} {{ .Values.continuum.infra.temporal.port }}; do
                 echo "Waiting for Temporal..."; sleep 5;
               done
           securityContext:
@@ -48,7 +48,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.postgresql.host }} {{ .Values.infra.postgresql.port }}; do
+              until nc -z {{ .Values.continuum.infra.postgresql.host }} {{ .Values.continuum.infra.postgresql.port }}; do
                 echo "Waiting for PostgreSQL..."; sleep 5;
               done
           securityContext:
@@ -63,8 +63,8 @@ spec:
             - sh
             - -c
             - |
-              MINIO_HOST=$(echo "{{ .Values.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f1)
-              MINIO_PORT=$(echo "{{ .Values.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f2)
+              MINIO_HOST=$(echo "{{ .Values.continuum.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f1)
+              MINIO_PORT=$(echo "{{ .Values.continuum.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f2)
               MINIO_PORT=${MINIO_PORT:-9000}
               until nc -z $MINIO_HOST $MINIO_PORT; do
                 echo "Waiting for MinIO..."; sleep 5;
@@ -76,7 +76,7 @@ spec:
                 - ALL
       containers:
         - name: api-server
-          image: "{{ .Values.apiServer.image.repository }}:{{ .Values.apiServer.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
+          image: "{{ .Values.continuum.apiServer.image.repository }}:{{ .Values.continuum.apiServer.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -91,11 +91,11 @@ spec:
             - name: TEMPORAL_SERVER_ADDRESS
               value: {{ include "continuum-platform.infra.temporal.address" . | quote }}
             - name: TEMPORAL_NAMESPACE
-              value: {{ .Values.infra.temporal.namespace | quote }}
+              value: {{ .Values.continuum.infra.temporal.namespace | quote }}
             - name: CONTINUUM_STORAGE_TYPE
-              value: {{ .Values.storage.type | quote }}
+              value: {{ .Values.continuum.storage.type | quote }}
             - name: CONTINUUM_MINIO_ENDPOINT
-              value: {{ .Values.infra.minio.endpoint | quote }}
+              value: {{ .Values.continuum.infra.minio.endpoint | quote }}
             - name: CONTINUUM_MINIO_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -107,13 +107,13 @@ spec:
                   name: {{ include "continuum-platform.minio.secretName" . }}
                   key: root-password
             - name: CONTINUUM_CACHE_DIRECTORY
-              value: "{{ .Values.cacheStorage.mountPath }}/workflow-data"
+              value: "{{ .Values.continuum.cacheStorage.mountPath }}/workflow-data"
             - name: CONTINUUM_CACHE_BUCKET_NAME
-              value: {{ .Values.storage.bucketName | quote }}
+              value: {{ .Values.continuum.storage.bucketName | quote }}
             - name: CONTINUUM_CACHE_BUCKET_REGION
-              value: {{ .Values.storage.bucketRegion | quote }}
+              value: {{ .Values.continuum.storage.bucketRegion | quote }}
             - name: CONTINUUM_CACHE_BUCKET_BASE_PATH
-              value: {{ .Values.storage.bucketBasePath | quote }}
+              value: {{ .Values.continuum.storage.bucketBasePath | quote }}
             - name: CONTINUUM_DB_URL
               value: {{ include "continuum-platform.infra.db.url" . | quote }}
             - name: CONTINUUM_DB_USERNAME
@@ -146,19 +146,19 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
           resources:
-            {{- toYaml .Values.apiServer.resources | nindent 12 }}
+            {{- toYaml .Values.continuum.apiServer.resources | nindent 12 }}
           volumeMounts:
             - name: cache-storage
-              mountPath: {{ .Values.cacheStorage.mountPath }}
+              mountPath: {{ .Values.continuum.cacheStorage.mountPath }}
       volumes:
         - name: cache-storage
           persistentVolumeClaim:
             claimName: {{ include "continuum-platform.api-server.fullname" . }}-cache
-      {{- with (.Values.apiServer.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.apiServer.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.apiServer.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.apiServer.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

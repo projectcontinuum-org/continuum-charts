@@ -1,22 +1,22 @@
-{{- if .Values.mosquitto.enabled }}
+{{- if .Values.continuum.mosquitto.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "continuum-infra.mosquitto.fullname" . }}-config
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.mosquitto.labels.configMap) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.mosquitto.annotations.configMap)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.configMap) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.configMap)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
 data:
   mosquitto.conf: |
-    persistence {{ .Values.mosquitto.config.persistence }}
+    persistence {{ .Values.continuum.mosquitto.config.persistence }}
     persistence_location /mosquitto/data/
     log_dest file /mosquitto/log/mosquitto.log
 
-    listener {{ .Values.mosquitto.config.tcpPort | default 1883 }}
-    listener {{ .Values.mosquitto.config.websocketPort | default 1884 }}
+    listener {{ .Values.continuum.mosquitto.config.tcpPort | default 1883 }}
+    listener {{ .Values.continuum.mosquitto.config.websocketPort | default 1884 }}
     protocol websockets
-    allow_anonymous {{ .Values.mosquitto.config.allowAnonymous }}
+    allow_anonymous {{ .Values.continuum.mosquitto.config.allowAnonymous }}
 {{- end }}

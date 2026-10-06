@@ -1,4 +1,4 @@
-{{- if .Values.messageBridge.enabled }}
+{{- if .Values.continuum.messageBridge.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: message-bridge
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.messageBridge.replicas | default 1 }}
+  replicas: {{ .Values.continuum.messageBridge.replicas | default 1 }}
   selector:
     matchLabels:
       app.kubernetes.io/component: message-bridge
@@ -33,7 +33,7 @@ spec:
             - sh
             - -c
             - |
-              KAFKA_BROKER=$(echo "{{ .Values.infra.kafka.brokerList }}" | tr ',' '\n' | head -1 | sed 's|.*://||')
+              KAFKA_BROKER=$(echo "{{ .Values.continuum.infra.kafka.brokerList }}" | tr ',' '\n' | head -1 | sed 's|.*://||')
               KAFKA_HOST=$(echo $KAFKA_BROKER | cut -d: -f1)
               KAFKA_PORT=$(echo $KAFKA_BROKER | cut -d: -f2)
               until nc -z $KAFKA_HOST $KAFKA_PORT; do
@@ -51,7 +51,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.mosquitto.host }} {{ .Values.infra.mosquitto.port }}; do
+              until nc -z {{ .Values.continuum.infra.mosquitto.host }} {{ .Values.continuum.infra.mosquitto.port }}; do
                 echo "Waiting for Mosquitto..."; sleep 5;
               done
           securityContext:
@@ -66,7 +66,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.postgresql.host }} {{ .Values.infra.postgresql.port }}; do
+              until nc -z {{ .Values.continuum.infra.postgresql.host }} {{ .Values.continuum.infra.postgresql.port }}; do
                 echo "Waiting for PostgreSQL..."; sleep 5;
               done
           securityContext:
@@ -76,7 +76,7 @@ spec:
                 - ALL
       containers:
         - name: message-bridge
-          image: "{{ .Values.messageBridge.image.repository }}:{{ .Values.messageBridge.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
+          image: "{{ .Values.continuum.messageBridge.image.repository }}:{{ .Values.continuum.messageBridge.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -89,9 +89,9 @@ spec:
               protocol: TCP
           env:
             - name: CONTINUUM_KAFKA_MAIN_BROKER_LIST
-              value: {{ .Values.infra.kafka.brokerList | quote }}
+              value: {{ .Values.continuum.infra.kafka.brokerList | quote }}
             - name: CONTINUUM_KAFKA_MAIN_SCHEMA_REGISTRY
-              value: {{ .Values.infra.schemaRegistry.url | quote }}
+              value: {{ .Values.continuum.infra.schemaRegistry.url | quote }}
             - name: JAVA_TOOL_OPTIONS
               value: "-Dcontinuum.core.bridge.mqtt.server-uri={{ include "continuum-platform.infra.mosquitto.uri" . }}"
             - name: CONTINUUM_DB_URL
@@ -126,12 +126,12 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 10
           resources:
-            {{- toYaml .Values.messageBridge.resources | nindent 12 }}
-      {{- with (.Values.messageBridge.nodeSelector | default .Values.global.nodeSelector) }}
+            {{- toYaml .Values.continuum.messageBridge.resources | nindent 12 }}
+      {{- with (.Values.continuum.messageBridge.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.messageBridge.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.messageBridge.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

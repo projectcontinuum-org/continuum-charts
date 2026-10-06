@@ -1,4 +1,4 @@
-{{- if .Values.featureBase.enabled }}
+{{- if .Values.continuum.featureBase.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,8 +7,8 @@ metadata:
     app.kubernetes.io/component: feature-base
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.featureBase.autoscaling.enabled }}
-  replicas: {{ .Values.featureBase.replicas | default 1 }}
+  {{- if not .Values.continuum.featureBase.autoscaling.enabled }}
+  replicas: {{ .Values.continuum.featureBase.replicas | default 1 }}
   {{- end }}
   selector:
     matchLabels:
@@ -35,7 +35,7 @@ spec:
             - sh
             - -c
             - |
-              KAFKA_BROKER=$(echo "{{ .Values.infra.kafka.brokerList }}" | tr ',' '\n' | head -1 | sed 's|.*://||')
+              KAFKA_BROKER=$(echo "{{ .Values.continuum.infra.kafka.brokerList }}" | tr ',' '\n' | head -1 | sed 's|.*://||')
               KAFKA_HOST=$(echo $KAFKA_BROKER | cut -d: -f1)
               KAFKA_PORT=$(echo $KAFKA_BROKER | cut -d: -f2)
               until nc -z $KAFKA_HOST $KAFKA_PORT; do
@@ -53,7 +53,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ .Values.infra.temporal.host }} {{ .Values.infra.temporal.port }}; do
+              until nc -z {{ .Values.continuum.infra.temporal.host }} {{ .Values.continuum.infra.temporal.port }}; do
                 echo "Waiting for Temporal..."; sleep 5;
               done
           securityContext:
@@ -68,8 +68,8 @@ spec:
             - sh
             - -c
             - |
-              MINIO_HOST=$(echo "{{ .Values.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f1)
-              MINIO_PORT=$(echo "{{ .Values.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f2)
+              MINIO_HOST=$(echo "{{ .Values.continuum.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f1)
+              MINIO_PORT=$(echo "{{ .Values.continuum.infra.minio.endpoint }}" | sed 's|http[s]*://||' | cut -d: -f2)
               MINIO_PORT=${MINIO_PORT:-9000}
               until nc -z $MINIO_HOST $MINIO_PORT; do
                 echo "Waiting for MinIO..."; sleep 5;
@@ -86,7 +86,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ include "continuum-platform.api-server.fullname" . }} {{ .Values.apiServer.service.port | default 8080 }}; do
+              until nc -z {{ include "continuum-platform.api-server.fullname" . }} {{ .Values.continuum.apiServer.service.port | default 8080 }}; do
                 echo "Waiting for API Server..."; sleep 5;
               done
           securityContext:
@@ -96,7 +96,7 @@ spec:
                 - ALL
       containers:
         - name: feature-base
-          image: "{{ .Values.featureBase.image.repository }}:{{ .Values.featureBase.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.continuum.featureBase.image.repository }}:{{ .Values.continuum.featureBase.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -105,15 +105,15 @@ spec:
                 - ALL
           env:
             - name: CONTINUUM_KAFKA_MAIN_BROKER_LIST
-              value: {{ .Values.infra.kafka.brokerList | quote }}
+              value: {{ .Values.continuum.infra.kafka.brokerList | quote }}
             - name: CONTINUUM_KAFKA_MAIN_SCHEMA_REGISTRY
-              value: {{ .Values.infra.schemaRegistry.url | quote }}
+              value: {{ .Values.continuum.infra.schemaRegistry.url | quote }}
             - name: TEMPORAL_SERVER_ADDRESS
               value: {{ include "continuum-platform.infra.temporal.address" . | quote }}
             - name: TEMPORAL_NAMESPACE
-              value: {{ .Values.infra.temporal.namespace | quote }}
+              value: {{ .Values.continuum.infra.temporal.namespace | quote }}
             - name: CONTINUUM_MINIO_ENDPOINT
-              value: {{ .Values.infra.minio.endpoint | quote }}
+              value: {{ .Values.continuum.infra.minio.endpoint | quote }}
             - name: CONTINUUM_MINIO_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -125,15 +125,15 @@ spec:
                   name: {{ include "continuum-platform.minio.secretName" . }}
                   key: root-password
             - name: CONTINUUM_API_SERVER_BASE_URL
-              value: "http://{{ include "continuum-platform.api-server.fullname" . }}:{{ .Values.apiServer.service.port | default 8080 }}"
+              value: "http://{{ include "continuum-platform.api-server.fullname" . }}:{{ .Values.continuum.apiServer.service.port | default 8080 }}"
             - name: CONTINUUM_NODE_TASK_QUEUE
-              value: {{ .Values.featureBase.taskQueue | quote }}
+              value: {{ .Values.continuum.featureBase.taskQueue | quote }}
             - name: CONTINUUM_CACHE_STORAGE_PATH
-              value: "{{ .Values.cacheStorage.mountPath }}/workflow-data"
+              value: "{{ .Values.continuum.cacheStorage.mountPath }}/workflow-data"
             - name: CONTINUUM_KNIME_WORKFLOW_STORAGE_PATH
-              value: "{{ .Values.cacheStorage.mountPath }}/knime-workflows"
+              value: "{{ .Values.continuum.cacheStorage.mountPath }}/knime-workflows"
             - name: CONTINUUM_KNIME_WORKSPACE_STORAGE_PATH
-              value: "{{ .Values.cacheStorage.mountPath }}/knime-workspaces"
+              value: "{{ .Values.continuum.cacheStorage.mountPath }}/knime-workspaces"
           livenessProbe:
             exec:
               command:
@@ -151,19 +151,19 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 15
           resources:
-            {{- toYaml .Values.featureBase.resources | nindent 12 }}
+            {{- toYaml .Values.continuum.featureBase.resources | nindent 12 }}
           volumeMounts:
             - name: cache-storage
-              mountPath: {{ .Values.cacheStorage.mountPath }}
+              mountPath: {{ .Values.continuum.cacheStorage.mountPath }}
       volumes:
         - name: cache-storage
           persistentVolumeClaim:
             claimName: {{ include "continuum-platform.feature-base.fullname" . }}-cache
-      {{- with (.Values.featureBase.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.featureBase.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.featureBase.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.featureBase.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

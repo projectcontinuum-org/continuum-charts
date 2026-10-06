@@ -1,11 +1,11 @@
-{{- if .Values.kafkaUi.enabled }}
+{{- if .Values.continuum.kafkaUi.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "continuum-infra.kafka-ui.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka-ui" "extra" .Values.kafkaUi.labels.service) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.kafkaUi.annotations.service)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka-ui" "extra" .Values.continuum.kafkaUi.labels.service) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafkaUi.annotations.service)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}

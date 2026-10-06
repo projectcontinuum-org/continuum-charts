@@ -1,11 +1,11 @@
-{{- if .Values.postgresql.enabled }}
+{{- if .Values.continuum.postgresql.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "continuum-infra.postgresql.fullname" . }}
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.postgresql.labels.statefulSet) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.postgresql.annotations.statefulSet)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.continuum.postgresql.labels.statefulSet) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.postgresql.annotations.statefulSet)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
@@ -19,8 +19,8 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.postgresql.labels.pod) | nindent 8 }}
-      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.postgresql.annotations.pod)) }}
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.continuum.postgresql.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.postgresql.annotations.pod)) }}
       annotations:
         {{- nindent 8 . }}
       {{- end }}
@@ -34,7 +34,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: postgresql
-          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+          image: "{{ .Values.continuum.postgresql.image.repository }}:{{ .Values.continuum.postgresql.image.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -47,7 +47,7 @@ spec:
               protocol: TCP
           env:
             - name: POSTGRES_USER
-              value: {{ .Values.postgresql.auth.postgresUser | quote }}
+              value: {{ .Values.continuum.postgresql.auth.postgresUser | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -72,18 +72,18 @@ spec:
                   key: continuum-db-name
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
-          {{- if .Values.postgresql.maxConnections }}
+          {{- if .Values.continuum.postgresql.maxConnections }}
           args:
             - postgres
             - -c
-            - max_connections={{ .Values.postgresql.maxConnections }}
+            - max_connections={{ .Values.continuum.postgresql.maxConnections }}
           {{- end }}
           livenessProbe:
             exec:
               command:
                 - pg_isready
                 - -U
-                - {{ .Values.postgresql.auth.postgresUser | quote }}
+                - {{ .Values.continuum.postgresql.auth.postgresUser | quote }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -93,7 +93,7 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - {{ .Values.postgresql.auth.postgresUser | quote }}
+                - {{ .Values.continuum.postgresql.auth.postgresUser | quote }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
@@ -103,12 +103,12 @@ spec:
               command:
                 - pg_isready
                 - -U
-                - {{ .Values.postgresql.auth.postgresUser | quote }}
+                - {{ .Values.continuum.postgresql.auth.postgresUser | quote }}
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 30
           resources:
-            {{- toYaml .Values.postgresql.resources | nindent 12 }}
+            {{- toYaml .Values.continuum.postgresql.resources | nindent 12 }}
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
@@ -119,15 +119,15 @@ spec:
           configMap:
             name: {{ include "continuum-infra.postgresql.fullname" . }}-init
             defaultMode: 0755
-      {{- with (.Values.postgresql.nodeSelector | default .Values.global.nodeSelector) }}
+      {{- with (.Values.continuum.postgresql.nodeSelector | default .Values.global.nodeSelector) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with (.Values.postgresql.tolerations | default .Values.global.tolerations) }}
+      {{- with (.Values.continuum.postgresql.tolerations | default .Values.global.tolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.postgresql.affinity }}
+      {{- with .Values.continuum.postgresql.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -142,5 +142,5 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.postgresql.persistence.size | default "10Gi" }}
+            storage: {{ .Values.continuum.postgresql.persistence.size | default "10Gi" }}
 {{- end }}

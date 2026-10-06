@@ -6,110 +6,112 @@
 global:
   imagePullPolicy: Always
 
-secrets:
-  postgresql:
-    username: continuum_owner
-    password: dev-continuum-pass
-  minio:
-    rootUser: "dev-minio-root"
-    rootPassword: "dev-minio-secret"
+continuum:
 
-# Scale down for development
-cloudGateway:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 250m
-      memory: 256Mi
+  secrets:
+    postgresql:
+      username: continuum_owner
+      password: dev-continuum-pass
+    minio:
+      rootUser: "dev-minio-root"
+      rootPassword: "dev-minio-secret"
 
-apiServer:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  # Scale down for development
+  cloudGateway:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
 
-orchestrationService:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 768Mi
+  apiServer:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
-messageBridge:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 768Mi
+  orchestrationService:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 768Mi
 
-clusterManager:
-  replicas: 1
-  workbench:
-    namespace: continuum-dev
-    defaultImage: projectcontinuum/continuum-workbench:0.0.5
-    imagePullPolicy: Always
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  messageBridge:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 768Mi
 
-networkPolicy:
-  workbenchIsolation:
-    # TODO: replace with the actual pod network + service network CIDR(s) of the dev cluster
-    # (minikube/kind/etc.) - the default in values.yaml is a placeholder and will not match
-    # every setup.
-    clusterInternalCIDRs:
-      - "10.0.0.0/8"
+  clusterManager:
+    replicas: 1
+    workbench:
+      namespace: continuum-dev
+      defaultImage: projectcontinuum/continuum-workbench:0.0.5
+      imagePullPolicy: Always
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
-credentialsServer:
-  replicas: 1
-  encryption:
-    # Generate a 32-byte (256-bit) key: openssl rand -base64 32
-    masterKey: "0vlRfevA4YFs5ZPFeOq3PCQQTp+qYNhvjePZXYiRro0="   # dev-only key
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  networkPolicy:
+    workbenchIsolation:
+      # TODO: replace with the actual pod network + service network CIDR(s) of the dev cluster
+      # (minikube/kind/etc.) - the default in values.yaml is a placeholder and will not match
+      # every setup.
+      clusterInternalCIDRs:
+        - "10.0.0.0/8"
 
-featureBase:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-  autoscaling:
-    enabled: false
+  credentialsServer:
+    replicas: 1
+    encryption:
+      # Generate a 32-byte (256-bit) key: openssl rand -base64 32
+      masterKey: "0vlRfevA4YFs5ZPFeOq3PCQQTp+qYNhvjePZXYiRro0="   # dev-only key
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
-featureCheminformatics:
-  replicas: 1
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
-  autoscaling:
-    enabled: false
+  featureBase:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: false
+
+  featureCheminformatics:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    autoscaling:
+      enabled: false

@@ -1,4 +1,4 @@
-{{- if and .Values.featureCheminformatics.enabled .Values.featureCheminformatics.autoscaling.enabled }}
+{{- if and .Values.continuum.featureCheminformatics.enabled .Values.continuum.featureCheminformatics.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -11,13 +11,13 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "continuum-platform.feature-cheminformatics.fullname" . }}
-  minReplicas: {{ .Values.featureCheminformatics.autoscaling.minReplicas | default 1 }}
-  maxReplicas: {{ .Values.featureCheminformatics.autoscaling.maxReplicas | default 5 }}
+  minReplicas: {{ .Values.continuum.featureCheminformatics.autoscaling.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.continuum.featureCheminformatics.autoscaling.maxReplicas | default 5 }}
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.featureCheminformatics.autoscaling.targetCPUUtilizationPercentage | default 75 }}
+          averageUtilization: {{ .Values.continuum.featureCheminformatics.autoscaling.targetCPUUtilizationPercentage | default 75 }}
 {{- end }}

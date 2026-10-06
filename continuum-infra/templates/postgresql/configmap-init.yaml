@@ -1,11 +1,11 @@
-{{- if .Values.postgresql.enabled }}
+{{- if .Values.continuum.postgresql.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "continuum-infra.postgresql.fullname" . }}-init
   labels:
-    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.postgresql.labels.configMap) | nindent 4 }}
-  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.postgresql.annotations.configMap)) }}
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "postgresql" "extra" .Values.continuum.postgresql.labels.configMap) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.postgresql.annotations.configMap)) }}
   annotations:
     {{- nindent 4 . }}
   {{- end }}
