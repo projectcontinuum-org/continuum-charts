@@ -1,0 +1,132 @@
+{{- if .Values.continuum.orchestrationService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "continuum-platform.orchestration-service.fullname" . }}
+  labels:
+    app.kubernetes.io/component: orchestration-service
+    {{- include "continuum-platform.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.continuum.orchestrationService.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: orchestration-service
+      {{- include "continuum-platform.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: orchestration-service
+        {{- include "continuum-platform.selectorLabels" . | nindent 8 }}
+        {{- include "continuum-platform.labels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-kafka
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          command:
+            - sh
+            - -c
+            - |
+              KAFKA_BROKER=$(echo "{{ .Values.continuum.infra.kafka.brokerList }}" | tr ',' '\n' | head -1 | sed 's|.*://||')
+              KAFKA_HOST=$(echo $KAFKA_BROKER | cut -d: -f1)
+              KAFKA_PORT=$(echo $KAFKA_BROKER | cut -d: -f2)
+              until nc -z $KAFKA_HOST $KAFKA_PORT; do
+                echo "Waiting for Kafka..."; sleep 5;
+              done
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: wait-for-temporal
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ .Values.continuum.infra.temporal.host }} {{ .Values.continuum.infra.temporal.port }}; do
+                echo "Waiting for Temporal..."; sleep 5;
+              done
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: wait-for-api-server
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ include "continuum-platform.api-server.fullname" . }} {{ .Values.continuum.apiServer.service.port | default 8080 }}; do
+                echo "Waiting for API Server..."; sleep 5;
+              done
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      containers:
+        - name: orchestration-service
+          image: "{{ .Values.continuum.orchestrationService.image.repository }}:{{ .Values.continuum.orchestrationService.image.tag | default .Values.global.continuumPlatformVersion | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: CONTINUUM_KAFKA_MAIN_BROKER_LIST
+              value: {{ .Values.continuum.infra.kafka.brokerList | quote }}
+            - name: CONTINUUM_KAFKA_MAIN_SCHEMA_REGISTRY
+              value: {{ .Values.continuum.infra.schemaRegistry.url | quote }}
+            - name: TEMPORAL_SERVER_ADDRESS
+              value: {{ include "continuum-platform.infra.temporal.address" . | quote }}
+            - name: TEMPORAL_NAMESPACE
+              value: {{ .Values.continuum.infra.temporal.namespace | quote }}
+            - name: CONTINUUM_API_SERVER_BASE_URL
+              value: "http://{{ include "continuum-platform.api-server.fullname" . }}:{{ .Values.continuum.apiServer.service.port | default 8080 }}"
+            - name: CONTINUUM_ORCHESTRATION_SERVICE_PORT
+              value: "8080"
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.continuum.orchestrationService.resources | nindent 12 }}
+      {{- with (.Values.continuum.orchestrationService.nodeSelector | default .Values.global.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (.Values.continuum.orchestrationService.tolerations | default .Values.global.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
