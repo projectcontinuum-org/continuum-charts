@@ -1,6 +1,6 @@
 # ============================================================
 # Development overrides for continuum-platform
-# Usage: helm install continuum-platform ./continuum-platform -f continuum-platform/values.yaml -f continuum-platform/values-dev.yaml -n continuum-dev --create-namespace
+# Usage: helm install continuum-platform ./charts/continuum-platform -f charts/continuum-platform/values-dev.yaml -n continuum-dev --create-namespace
 # ============================================================
 
 global:

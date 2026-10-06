@@ -1,6 +1,6 @@
 # Continuum Helm Charts
 
-This directory contains three Helm charts for deploying Project Continuum on Kubernetes:
+This repository contains three Helm charts for deploying Project Continuum on Kubernetes, published as a standard Helm chart repository via GitHub Pages.
 
 
 | Chart                | Description                                                                                                                            | Required |
@@ -8,6 +8,54 @@ This directory contains three Helm charts for deploying Project Continuum on Kub
 | `continuum-infra`    | Core infrastructure services — PostgreSQL, Temporal, Kafka, Schema Registry, Kafka UI, Mosquitto, MinIO                               | Yes      |
 | `continuum-platform` | Application services — API Server, Orchestration Service, Message Bridge, Workbench, Feature Workers                                  | Yes      |
 | `continuum-sso`      | Optional Single Sign-On — OAuth2 Proxy with Keycloak OIDC                                                                              | No       |
+
+## Helm Repository
+
+This repository is published as a Helm chart repository via GitHub Pages.
+
+### Add the repository
+
+```bash
+helm repo add continuum https://projectcontinuum.github.io/continuum-charts
+helm repo update
+```
+
+### Search available charts
+
+```bash
+helm search repo continuum
+```
+
+### Install from the repository
+
+```bash
+# Install infrastructure
+helm install continuum-infra continuum/continuum-infra \
+  -n continuum --create-namespace \
+  --wait --timeout 15m
+
+# Install platform
+helm install continuum-platform continuum/continuum-platform \
+  -n continuum \
+  --wait --timeout 10m
+```
+
+### Use as a dependency in another chart
+
+In your chart's `Chart.yaml`:
+
+```yaml
+dependencies:
+  - name: continuum-infra
+    version: ">=0.1.0"
+    repository: "https://projectcontinuum.github.io/continuum-charts"
+```
+
+Then run:
+
+```bash
+helm dependency update ./my-chart
+```
 
 ## Prerequisites
 
@@ -22,6 +70,38 @@ This directory contains three Helm charts for deploying Project Continuum on Kub
 
 **Prerequisites:** [Minikube](https://minikube.sigs.k8s.io/docs/start/) and [Helm](https://helm.sh/docs/intro/install/) installed.
 
+**Option A — Install from the Helm repository (recommended):**
+
+```bash
+# Start minikube (4 CPUs, 8GB RAM recommended)
+minikube start --cpus=4 --memory=8192
+
+# Create the namespaces
+kubectl create namespace continuum-dev
+kubectl create namespace continuum-workbench-dev
+
+# Add the Helm repository
+helm repo add continuum https://projectcontinuum.github.io/continuum-charts
+helm repo update
+
+# Install infrastructure (PostgreSQL, Temporal, Kafka, MinIO, Mosquitto)
+helm install continuum-infra continuum/continuum-infra \
+  -n continuum-dev \
+  --wait --timeout 15m
+
+# Install platform (Cloud Gateway, API Server, Cluster Manager, Workers)
+helm install continuum-platform continuum/continuum-platform \
+  -n continuum-dev \
+  --wait --timeout 10m
+
+# Verify everything is running
+kubectl get pods -n continuum-dev
+```
+
+**Option B — Install from source (for development):**
+
+> **Note:** The `values-dev.yaml` files are excluded from packaged charts. To use dev overrides, clone this repository and install from source.
+
 ```bash
 # Clone the repo
 git clone https://github.com/projectcontinuum/continuum-charts.git
@@ -35,18 +115,18 @@ kubectl create namespace continuum-dev
 kubectl create namespace continuum-workbench-dev
 
 # Build infra chart dependencies (downloads Temporal subchart)
-helm dependency update ./continuum-infra
+helm dependency build ./charts/continuum-infra
 
 # Install infrastructure (PostgreSQL, Temporal, Kafka, MinIO, Mosquitto)
-helm install continuum-infra ./continuum-infra \
+helm install continuum-infra ./charts/continuum-infra \
   -n continuum-dev \
-  -f continuum-infra/values-dev.yaml \
+  -f charts/continuum-infra/values-dev.yaml \
   --wait --timeout 15m
 
 # Install platform (Cloud Gateway, API Server, Cluster Manager, Workers)
-helm install continuum-platform ./continuum-platform \
+helm install continuum-platform ./charts/continuum-platform \
   -n continuum-dev \
-  -f continuum-platform/values-dev.yaml \
+  -f charts/continuum-platform/values-dev.yaml \
   --wait --timeout 10m
 
 # Verify everything is running
@@ -128,10 +208,10 @@ kubectl create namespace continuum
 The `continuum-infra` chart depends on three subcharts (Temporal, Cassandra, Elasticsearch). Download them first:
 
 ```bash
-helm dependency build ./continuum-infra
+helm dependency build ./charts/continuum-infra
 ```
 
-This creates a `charts/` directory containing the downloaded `.tgz` archives.
+This downloads the dependency `.tgz` archives into the chart's `charts/` subdirectory.
 
 ### Step 3: Configure credentials
 
@@ -180,14 +260,14 @@ minio:
 ### Step 4: Install the infrastructure chart
 
 ```bash
-# Development
-helm install continuum-infra ./continuum-infra \
+# Development (from source)
+helm install continuum-infra ./charts/continuum-infra \
   -n continuum \
-  -f continuum-infra/values-dev.yaml \
+  -f charts/continuum-infra/values-dev.yaml \
   --wait --timeout 15m
 
-# Production
-helm install continuum-infra ./continuum-infra \
+# Production (from Helm repo)
+helm install continuum-infra continuum/continuum-infra \
   -n continuum \
   -f my-values.yaml \
   --wait --timeout 15m
@@ -244,14 +324,14 @@ secrets:
 ### Step 7: Install the platform chart
 
 ```bash
-# Development
-helm install continuum-platform ./continuum-platform \
+# Development (from source)
+helm install continuum-platform ./charts/continuum-platform \
   -n continuum \
-  -f continuum-platform/values-dev.yaml \
+  -f charts/continuum-platform/values-dev.yaml \
   --wait --timeout 10m
 
-# Production
-helm install continuum-platform ./continuum-platform \
+# Production (from Helm repo)
+helm install continuum-platform continuum/continuum-platform \
   -n continuum \
   -f platform-values.yaml \
   --wait --timeout 10m
@@ -338,9 +418,9 @@ kubectl create secret generic oauth2-proxy-client-creds \
 **Step 3: Install the SSO chart**
 
 ```bash
-helm install continuum-sso ./continuum-sso \
+helm install continuum-sso ./charts/continuum-sso \
   -n continuum-dev \
-  -f continuum-sso/values-dev.yaml \
+  -f charts/continuum-sso/values-dev.yaml \
   --wait
 ```
 
@@ -418,16 +498,16 @@ kubectl exec -n continuum deploy/continuum-platform-api-server -- \
 ## Upgrading
 
 ```bash
-# Update infrastructure
-helm upgrade continuum-infra ./continuum-infra \
+# Update infrastructure (from source)
+helm upgrade continuum-infra ./charts/continuum-infra \
   -n continuum \
-  -f continuum-infra/values-dev.yaml \
+  -f charts/continuum-infra/values-dev.yaml \
   --wait --timeout 15m
 
-# Update platform
-helm upgrade continuum-platform ./continuum-platform \
+# Update platform (from source)
+helm upgrade continuum-platform ./charts/continuum-platform \
   -n continuum \
-  -f continuum-platform/values-dev.yaml \
+  -f charts/continuum-platform/values-dev.yaml \
   --wait --timeout 10m
 ```
 

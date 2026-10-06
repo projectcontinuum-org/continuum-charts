@@ -3,7 +3,7 @@
 # =============================================================================
 # Usage:
 #   helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.20.0 --namespace cert-manager --create-namespace --set crds.enabled=true
-#   helm install continuum-infra ./continuum-infra -f continuum-infra/values.yaml -f continuum-infra/values-dev.yaml -n continuum-dev --create-namespace
+#   helm install continuum-infra ./charts/continuum-infra -f charts/continuum-infra/values-dev.yaml -n continuum-dev --create-namespace
 #
 # This file supplies non-secret default passwords and reduced resource requests
 # suitable for a local or shared development cluster (e.g. kind, minikube,

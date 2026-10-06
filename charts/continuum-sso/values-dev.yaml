@@ -2,7 +2,7 @@
 # Project Continuum — SSO Development Environment Overrides
 # =============================================================================
 # Usage:
-#   helm install continuum-sso ./continuum-sso -f continuum-sso/values-dev.yaml -n continuum-dev
+#   helm install continuum-sso ./charts/continuum-sso -f charts/continuum-sso/values-dev.yaml -n continuum-dev
 #
 # This file supplies development-specific configurations for SSO.
 #
