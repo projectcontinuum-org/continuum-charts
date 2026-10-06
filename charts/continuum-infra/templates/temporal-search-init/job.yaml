@@ -1,0 +1,81 @@
+{{- if .Values.continuum.temporalSearchInit.enabled }}
+{{- $hookAnnotations := dict "helm.sh/hook" "post-install,post-upgrade" "helm.sh/hook-weight" "10" "helm.sh/hook-delete-policy" "before-hook-creation" }}
+{{- $jobAnnotations := dict }}
+{{- $jobAnnotations = mergeOverwrite $jobAnnotations (.Values.continuum.temporalSearchInit.annotations.job | default dict) }}
+{{- $jobAnnotations = mergeOverwrite $jobAnnotations $hookAnnotations }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "continuum-infra.fullname" . }}-temporal-search-init
+  labels:
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "temporal-search-init" "extra" .Values.continuum.temporalSearchInit.labels.job) | nindent 4 }}
+  annotations:
+    {{- include "continuum-infra.componentAnnotations" (dict "context" $ "extra" $jobAnnotations) | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: {{ .Values.continuum.temporalSearchInit.backoffLimit | default 5 }}
+  activeDeadlineSeconds: {{ .Values.continuum.temporalSearchInit.activeDeadlineSeconds | default 600 }}
+  template:
+    metadata:
+      labels:
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "temporal-search-init" "extra" .Values.continuum.temporalSearchInit.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.temporalSearchInit.annotations.pod)) }}
+      annotations:
+        {{- nindent 8 . }}
+      {{- end }}
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: false
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: temporal-search-init
+          image: "{{ .Values.continuum.temporalSearchInit.image.repository }}:{{ .Values.continuum.temporalSearchInit.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          env:
+            - name: TEMPORAL_ADDRESS
+              value: "{{ .Release.Name }}-temporal-frontend:7233"
+            - name: TEMPORAL_CLI_ADDRESS
+              value: "{{ .Release.Name }}-temporal-frontend:7233"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Waiting for Temporal server to be ready..."
+              max_attempts=60
+              attempt=0
+              until temporal operator cluster health 2>/dev/null | grep -q "SERVING"; do
+                attempt=$((attempt + 1))
+                if [ $attempt -ge $max_attempts ]; then
+                  echo "Temporal server did not become ready in time, exiting..."
+                  exit 1
+                fi
+                echo "Temporal not ready yet (attempt $attempt/$max_attempts), waiting..."
+                sleep 5
+              done
+              echo "Temporal cluster is healthy. Checking for default namespace..."
+              
+              # Check if default namespace exists, create if it doesn't
+              if ! temporal operator namespace describe default > /dev/null 2>&1; then
+                echo "Default namespace not found, creating it..."
+                temporal operator namespace create default --retention 72h
+                echo "Default namespace created successfully."
+              else
+                echo "Default namespace already exists."
+              fi
+              
+              echo "Temporal is ready. Creating search attributes..."
+              {{- range .Values.continuum.temporalSearchInit.attributes }}
+              temporal operator search-attribute create --namespace default --name {{ .name | quote }} --type {{ .type }} || true
+              {{- end }}
+              echo "Search attributes created successfully!"
+      {{- with (.Values.continuum.temporalSearchInit.nodeSelector | default .Values.global.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (.Values.continuum.temporalSearchInit.tolerations | default .Values.global.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

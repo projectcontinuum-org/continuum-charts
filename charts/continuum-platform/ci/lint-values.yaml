@@ -1,0 +1,6 @@
+continuum:
+  secrets:
+    postgresql:
+      password: lint-test-pass
+    minio:
+      rootPassword: lint-test-pass

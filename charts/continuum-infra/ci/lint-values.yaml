@@ -1,0 +1,45 @@
+continuum:
+  postgresql:
+    auth:
+      postgresPassword: lint-test-pass
+      continuumPassword: lint-test-pass
+  minio:
+    auth:
+      rootUser: lint-test-user
+      rootPassword: lint-test-pass
+
+# Disable Cassandra and Elasticsearch (use SQL stores for lint)
+cassandra:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+# Temporal — configure SQL persistence stores so subchart templates render
+temporal:
+  server:
+    config:
+      persistence:
+        datastores:
+          default:
+            sql:
+              pluginName: postgres12
+              databaseName: temporal
+              connectAddr: "lint-test-postgresql:5432"
+              connectProtocol: "tcp"
+              user: postgres
+              password: lint-test-pass
+              maxConns: 20
+              maxIdleConns: 20
+              maxConnLifetime: "1h"
+          visibility:
+            sql:
+              pluginName: postgres12
+              databaseName: temporal_visibility
+              connectAddr: "lint-test-postgresql:5432"
+              connectProtocol: "tcp"
+              user: postgres
+              password: lint-test-pass
+              maxConns: 20
+              maxIdleConns: 20
+              maxConnLifetime: "1h"

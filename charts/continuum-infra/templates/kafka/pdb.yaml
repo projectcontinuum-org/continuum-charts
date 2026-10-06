@@ -1,0 +1,18 @@
+{{- if and .Values.continuum.kafka.enabled .Values.continuum.kafka.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "continuum-infra.kafka.fullname" . }}
+  labels:
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "kafka" "extra" .Values.continuum.kafka.labels.pdb) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.kafka.annotations.pdb)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+spec:
+  minAvailable: {{ .Values.continuum.kafka.podDisruptionBudget.minAvailable | default 2 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: kafka
+      {{- include "continuum-infra.selectorLabels" . | nindent 6 }}
+{{- end }}

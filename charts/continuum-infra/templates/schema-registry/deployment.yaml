@@ -1,0 +1,86 @@
+{{- if .Values.continuum.schemaRegistry.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "continuum-infra.schema-registry.fullname" . }}
+  labels:
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.continuum.schemaRegistry.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.schemaRegistry.annotations.deployment)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.continuum.schemaRegistry.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: schema-registry
+      {{- include "continuum-infra.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "schema-registry" "extra" .Values.continuum.schemaRegistry.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.schemaRegistry.annotations.pod)) }}
+      annotations:
+        {{- nindent 8 . }}
+      {{- end }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-kafka
+          image: "{{ .Values.global.initContainer.image.repository }}:{{ .Values.global.initContainer.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          command: ['sh', '-c', 'until nc -z {{ include "continuum-infra.kafka.fullname" . }}-0.{{ include "continuum-infra.kafka.fullname" . }}-headless 19092; do echo "Waiting for Kafka..."; sleep 5; done']
+      containers:
+        - name: schema-registry
+          image: "{{ .Values.continuum.schemaRegistry.image.repository }}:{{ .Values.continuum.schemaRegistry.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: {{ .Values.continuum.schemaRegistry.service.port | default 8080 }}
+              name: http
+              protocol: TCP
+          env:
+            - name: SCHEMA_REGISTRY_HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+              value: {{ include "continuum-infra.kafka.brokerList" . | quote }}
+            - name: SCHEMA_REGISTRY_LISTENERS
+              value: "http://0.0.0.0:{{ .Values.continuum.schemaRegistry.service.port | default 8080 }}"
+          livenessProbe:
+            httpGet:
+              path: /subjects
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /subjects
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            {{- toYaml .Values.continuum.schemaRegistry.resources | nindent 12 }}
+      {{- with (.Values.continuum.schemaRegistry.nodeSelector | default .Values.global.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (.Values.continuum.schemaRegistry.tolerations | default .Values.global.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

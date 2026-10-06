@@ -1,0 +1,41 @@
+{{- if and .Values.continuum.mosquitto.enabled .Values.continuum.mosquitto.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "continuum-infra.mosquitto.fullname" . }}-data
+  labels:
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.pvc) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.pvc)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.continuum.mosquitto.persistence.size | default "1Gi" }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "continuum-infra.mosquitto.fullname" . }}-log
+  labels:
+    {{- include "continuum-infra.componentLabels" (dict "context" $ "component" "mosquitto" "extra" .Values.continuum.mosquitto.labels.pvc) | nindent 4 }}
+  {{- with (include "continuum-infra.componentAnnotations" (dict "context" $ "extra" .Values.continuum.mosquitto.annotations.pvc)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.continuum.mosquitto.persistence.logSize | default "500Mi" }}
+{{- end }}

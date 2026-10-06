@@ -1,0 +1,366 @@
+# ============================================================
+# Global settings
+# ============================================================
+global:
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  continuumPlatformVersion: "0.0.15"
+
+  # Image used by all init containers (wait-for-* readiness checks).
+  # Override repository and/or tag to pull from a private registry mirror.
+  initContainer:
+    image:
+      repository: busybox
+      tag: "1.36"
+
+  # Default nodeSelector applied to every pod in this chart.
+  # A non-empty per-component nodeSelector overrides this.
+  nodeSelector: {}
+
+  # Default tolerations applied to every pod in this chart.
+  # A non-empty per-component tolerations list overrides this.
+  tolerations: []
+
+# ============================================================
+# Continuum — values owned by this chart's own templates
+# ============================================================
+continuum:
+
+  # ============================================================
+  # Infrastructure service references
+  # These MUST match the release name and service names from continuum-infra
+  # ============================================================
+  infra:
+    releaseName: continuum-infra
+    postgresql:
+      host: continuum-infra-postgresql
+      port: 5432
+      database: continuum
+    temporal:
+      host: continuum-infra-temporal-frontend
+      port: 7233
+      namespace: default
+    kafka:
+      brokerList: "PLAINTEXT://continuum-infra-kafka-0.continuum-infra-kafka-headless:19092"
+    schemaRegistry:
+      url: "http://continuum-infra-schema-registry:8080"
+    mosquitto:
+      host: continuum-infra-mosquitto
+      port: 1883
+    minio:
+      endpoint: "http://continuum-infra-minio:9000"
+
+  # ============================================================
+  # Secrets
+  # Provide credentials directly or reference existing secrets
+  # ============================================================
+  secrets:
+    # Option 1: Inline credentials (dev/staging)
+    postgresql:
+      username: continuum_owner
+      password: ""                   # REQUIRED — override via --set or values-dev.yaml
+    minio:
+      rootUser: ""                   # REQUIRED
+      rootPassword: ""               # REQUIRED
+    # Option 2: Use existing secrets (production — Vault, External Secrets, etc.)
+    existingPostgresqlSecret: ""     # Secret with keys: username, password
+    existingMinioSecret: ""          # Secret with keys: root-user, root-password
+
+  # ============================================================
+  # Storage configuration (S3/MinIO)
+  # ============================================================
+  storage:
+    type: minio
+    bucketName: continuum-worker-storage
+    bucketRegion: us-east-2
+    bucketBasePath: workflow-data
+
+  # ============================================================
+  # Local cache storage (PVC for temporary workflow data)
+  # ============================================================
+  cacheStorage:
+    mountPath: /data/continuum-cache
+    size: 5Gi
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+
+  # ============================================================
+  # continuum-cloud-gateway (reverse proxy / single entry point)
+  # ============================================================
+  cloudGateway:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-cloud-gateway
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  # ============================================================
+  # continuum-api-server
+  # ============================================================
+  apiServer:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-api-server
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 1Gi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  # ============================================================
+  # continuum-orchestration-service
+  # ============================================================
+  orchestrationService:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-orchestration-service
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 1Gi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  # ============================================================
+  # continuum-cluster-manager
+  # ============================================================
+  clusterManager:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-cluster-manager
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    # Workbench instance configuration
+    workbench:
+      # Namespace where workbench instances will be created (configurable per env)
+      namespace: continuum-workbench
+      # Default image for workbench instances
+      defaultImage: projectcontinuum/continuum-workbench:latest
+      # Image pull policy for workbench instances (Always, IfNotPresent, Never)
+      imagePullPolicy: IfNotPresent
+      # K8s resource overlay variants — named sets of YAML overlays that customize
+      # workbench Deployment, Service, PVC, and Ingress manifests.
+      # Users select a variant when creating a workbench; the selected variant's
+      # overlays are deep-merged onto the rendered base manifests (objects merge
+      # recursively, arrays and scalars replace). Critical identity fields
+      # (name, namespace, lifecycle labels) are protected and cannot be overridden.
+      # Overlay files are FreeMarker templates with access to: instanceId, namespace,
+      # userId, image, imagePullPolicy, cpuRequest, cpuLimit, memoryRequest,
+      # memoryLimit, storageSize, storageClassName.
+      # Traefik middleware for path stripping (requires traefik.io CRDs on the cluster)
+      middleware:
+        enabled: false
+        # Context-path prefixes to strip before forwarding to backends.
+        # Only paths starting with a listed prefix are affected;
+        # the workbench root (/) passes through unmodified.
+        stripPrefixes:
+          - /api-server
+          - /credentials-manager
+      overlays:
+        enabled: false
+        variants: {}
+        # Example — GPU and CPU workbench variants:
+        # variants:
+        #   gpu-enabled:
+        #     deployment.yaml: |
+        #       spec:
+        #         template:
+        #           spec:
+        #             tolerations:
+        #               - key: "nvidia.com/gpu"
+        #                 operator: "Exists"
+        #                 effect: "NoSchedule"
+        #             nodeSelector:
+        #               accelerator: nvidia-tesla-v100
+        #     ingress.yaml: |
+        #       spec:
+        #         rules:
+        #           - host: "${userId}.gpu.workbench.example.com"
+        #             http:
+        #               paths:
+        #                 - path: /
+        #                   pathType: Prefix
+        #                   backend:
+        #                     service:
+        #                       name: wb-${instanceId}-svc
+        #                       port:
+        #                         number: 8080
+        #   cpu-only:
+        #     deployment.yaml: |
+        #       spec:
+        #         template:
+        #           spec:
+        #             nodeSelector:
+        #               workload-type: cpu-workbench
+        #     service.yaml: |
+        #       metadata:
+        #         annotations:
+        #           service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  # ============================================================
+  # NetworkPolicy - workbench isolation
+  # ============================================================
+  networkPolicy:
+    workbenchIsolation:
+      enabled: true
+      # CIDR ranges considered "internal" to the cluster (pod network + service network).
+      # MUST be overridden per cluster - these are placeholders and will NOT match every setup.
+      clusterInternalCIDRs:
+        - "10.0.0.0/8"
+      dns:
+        namespace: kube-system
+        podSelector:
+          k8s-app: kube-dns
+
+  # ============================================================
+  # continuum-credentials-server
+  # ============================================================
+  credentialsServer:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-credentials-server
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    encryption:
+      # Generate a 32-byte (256-bit) key: openssl rand -base64 32
+      masterKey: ""                  # REQUIRED — Base64-encoded 256-bit AES key
+    existingEncryptionSecret: ""     # Alternative: reference an existing secret with key: master-key
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  # ============================================================
+  # continuum-message-bridge
+  # ============================================================
+  messageBridge:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-message-bridge
+      pullPolicy: IfNotPresent
+    replicas: 1
+    port: 8080
+    service:
+      type: ClusterIP
+      port: 8080
+    resources:
+      requests:
+        cpu: 250m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 512Mi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+
+  # ============================================================
+  # Feature Workers (horizontally scalable)
+  # ============================================================
+  featureBase:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-feature-base
+      tag: "0.0.8"
+      pullPolicy: IfNotPresent
+    replicas: 1
+    taskQueue: CONTINUUM_FEATURE_BASE_TASK_QUEUE
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  featureCheminformatics:
+    enabled: true
+    image:
+      repository: projectcontinuum/continuum-feature-cheminformatics
+      tag: "0.0.6"
+      pullPolicy: IfNotPresent
+    replicas: 1
+    taskQueue: CONTINUUM_CHEMINFORMATICS_WORKER_TASK_QUEUE
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 2Gi
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 70
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
