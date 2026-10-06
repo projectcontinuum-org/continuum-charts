@@ -14,3 +14,4 @@
 .hgignore
 .svn
 values-dev.yaml
+ci/
