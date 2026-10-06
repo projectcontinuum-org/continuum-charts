@@ -1,0 +1,60 @@
+apiVersion: v1
+entries:
+  continuum-infra:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2026-10-06T07:51:00.414717888Z"
+    dependencies:
+    - condition: temporal.enabled
+      name: temporal
+      repository: https://go.temporal.io/helm-charts/
+      version: '>=1.0.0-0'
+    - condition: cassandra.enabled
+      name: cassandra
+      repository: https://charts.bitnami.com/bitnami
+      version: ~12.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: ~22.x
+    description: Core infrastructure services for Project Continuum — Temporal, Kafka,
+      PostgreSQL, MinIO, Mosquitto
+    digest: 3ccd5b1d3ab287554f0b6cf6f47f50a1047b5762883f57261ca058d9e4bbdb92
+    home: https://github.com/projectcontinuum
+    keywords:
+    - continuum
+    - infrastructure
+    - temporal
+    - kafka
+    - postgresql
+    - minio
+    - mosquitto
+    maintainers:
+    - name: Project Continuum
+    name: continuum-infra
+    type: application
+    urls:
+    - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-infra-0.1.0/continuum-infra-0.1.0.tgz
+    version: 0.1.0
+  continuum-platform:
+  - annotations:
+      continuum.io/requires: continuum-infra >= 0.1.0
+    apiVersion: v2
+    appVersion: 0.0.10
+    created: "2026-10-06T07:51:00.616431513Z"
+    description: Project Continuum application services — API server, orchestration,
+      workbench, and feature workers
+    digest: e8dae78fd65ac3e3f8e1ef1bc3fa0a0113924c15fe565b2979492674046780c7
+    home: https://github.com/projectcontinuum
+    keywords:
+    - continuum
+    - workflow
+    - platform
+    maintainers:
+    - name: Project Continuum
+    name: continuum-platform
+    type: application
+    urls:
+    - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-platform-0.1.0/continuum-platform-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-10-06T07:51:00.616436969Z"
