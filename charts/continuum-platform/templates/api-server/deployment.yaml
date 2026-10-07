@@ -8,6 +8,10 @@ metadata:
     {{- include "continuum-platform.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.continuum.apiServer.replicas | default 1 }}
+  {{- if eq (.Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce") "ReadWriteOnce" }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: api-server
