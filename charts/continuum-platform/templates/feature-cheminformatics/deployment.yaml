@@ -10,6 +10,10 @@ spec:
   {{- if not .Values.continuum.featureCheminformatics.autoscaling.enabled }}
   replicas: {{ .Values.continuum.featureCheminformatics.replicas | default 1 }}
   {{- end }}
+  {{- if eq (.Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce") "ReadWriteOnce" }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: feature-cheminformatics
