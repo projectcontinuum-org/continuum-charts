@@ -2,7 +2,7 @@ apiVersion: v2
 name: continuum-platform
 description: Project Continuum application services — API server, orchestration, workbench, and feature workers
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "0.0.10"
 keywords:
   - continuum
