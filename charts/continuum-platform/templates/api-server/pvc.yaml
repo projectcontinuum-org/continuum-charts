@@ -4,8 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "continuum-platform.api-server.fullname" . }}-cache
   labels:
-    app.kubernetes.io/component: api-server
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "api-server" "extra" .Values.continuum.apiServer.labels.pvc) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.apiServer.annotations.pvc)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce" }}

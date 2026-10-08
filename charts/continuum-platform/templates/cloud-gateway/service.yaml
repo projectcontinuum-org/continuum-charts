@@ -4,8 +4,11 @@ kind: Service
 metadata:
   name: {{ include "continuum-platform.cloud-gateway.fullname" . }}
   labels:
-    app.kubernetes.io/component: cloud-gateway
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cloud-gateway" "extra" .Values.continuum.cloudGateway.labels.service) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.cloudGateway.annotations.service)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   type: ClusterIP
   ports:

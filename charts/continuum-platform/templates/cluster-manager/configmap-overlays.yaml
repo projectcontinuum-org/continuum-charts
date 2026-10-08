@@ -4,8 +4,11 @@ kind: ConfigMap
 metadata:
   name: {{ include "continuum-platform.cluster-manager.fullname" . }}-overlays
   labels:
-    app.kubernetes.io/component: cluster-manager
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cluster-manager" "extra" .Values.continuum.clusterManager.labels.configMap) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.clusterManager.annotations.configMap)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 data:
   {{- range $variant, $files := .Values.continuum.clusterManager.workbench.overlays.variants }}
   {{- range $filename, $content := $files }}

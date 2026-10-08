@@ -21,6 +21,14 @@ global:
   # A non-empty per-component tolerations list overrides this.
   tolerations: []
 
+  # Labels applied to every resource created by this chart's templates,
+  # merged underneath each component's own labels.
+  labels: {}
+
+  # Annotations applied to every resource created by this chart's templates,
+  # merged underneath each component's own annotations.
+  annotations: {}
+
 # ============================================================
 # Continuum — values owned by this chart's own templates
 # ============================================================
@@ -65,6 +73,12 @@ continuum:
     # Option 2: Use existing secrets (production — Vault, External Secrets, etc.)
     existingPostgresqlSecret: ""     # Secret with keys: username, password
     existingMinioSecret: ""          # Secret with keys: root-user, root-password
+    labels:
+      postgresql: {}
+      minio: {}
+    annotations:
+      postgresql: {}
+      minio: {}
 
   # ============================================================
   # Storage configuration (S3/MinIO)
@@ -107,6 +121,14 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
 
   # ============================================================
   # continuum-api-server
@@ -131,6 +153,16 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+      pvc: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
+      pvc: {}
 
   # ============================================================
   # continuum-orchestration-service
@@ -155,6 +187,14 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
 
   # ============================================================
   # continuum-cluster-manager
@@ -245,6 +285,26 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+      serviceAccount: {}
+      role: {}
+      roleBinding: {}
+      configMap: {}
+      middleware: {}
+      networkPolicy: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
+      serviceAccount: {}
+      role: {}
+      roleBinding: {}
+      configMap: {}
+      middleware: {}
+      networkPolicy: {}
 
   # ============================================================
   # NetworkPolicy - workbench isolation
@@ -288,6 +348,14 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
 
   # ============================================================
   # continuum-message-bridge
@@ -312,6 +380,14 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      service: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      service: {}
 
 
   # ============================================================
@@ -340,6 +416,16 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      pvc: {}
+      hpa: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      pvc: {}
+      hpa: {}
 
   featureCheminformatics:
     enabled: true
@@ -364,3 +450,13 @@ continuum:
     nodeSelector: {}
     tolerations: []
     affinity: {}
+    labels:
+      deployment: {}
+      pod: {}
+      pvc: {}
+      hpa: {}
+    annotations:
+      deployment: {}
+      pod: {}
+      pvc: {}
+      hpa: {}
