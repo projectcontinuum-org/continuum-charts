@@ -111,6 +111,26 @@ entries:
       continuum.io/requires: continuum-infra >= 0.1.0
     apiVersion: v2
     appVersion: 0.0.10
+    created: "2026-10-08T10:17:21.532486382Z"
+    description: Project Continuum application services — API server, orchestration,
+      workbench, and feature workers
+    digest: 612b8743dc5c883ca179fc3ca41bbd7f4f356fae843bd6c0c3652148dd784fe4
+    home: https://github.com/projectcontinuum
+    keywords:
+    - continuum
+    - workflow
+    - platform
+    maintainers:
+    - name: Project Continuum
+    name: continuum-platform
+    type: application
+    urls:
+    - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-platform-0.1.2/continuum-platform-0.1.2.tgz
+    version: 0.1.2
+  - annotations:
+      continuum.io/requires: continuum-infra >= 0.1.0
+    apiVersion: v2
+    appVersion: 0.0.10
     created: "2026-10-07T05:50:32.296163709Z"
     description: Project Continuum application services — API server, orchestration,
       workbench, and feature workers
@@ -147,4 +167,4 @@ entries:
     urls:
     - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-platform-0.1.0/continuum-platform-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-07T12:02:07.09052434Z"
+generated: "2026-10-08T10:17:21.532500543Z"
