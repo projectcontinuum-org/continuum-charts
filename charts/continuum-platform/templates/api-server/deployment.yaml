@@ -4,8 +4,11 @@ kind: Deployment
 metadata:
   name: {{ include "continuum-platform.api-server.fullname" . }}
   labels:
-    app.kubernetes.io/component: api-server
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "api-server" "extra" .Values.continuum.apiServer.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.apiServer.annotations.deployment)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   replicas: {{ .Values.continuum.apiServer.replicas | default 1 }}
   {{- if eq (.Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce") "ReadWriteOnce" }}
@@ -19,9 +22,11 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: api-server
-        {{- include "continuum-platform.selectorLabels" . | nindent 8 }}
-        {{- include "continuum-platform.labels" . | nindent 8 }}
+        {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "api-server" "extra" .Values.continuum.apiServer.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.apiServer.annotations.pod)) }}
+      annotations:
+        {{- nindent 8 . }}
+      {{- end }}
     spec:
       securityContext:
         runAsNonRoot: true

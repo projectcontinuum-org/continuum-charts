@@ -5,8 +5,11 @@ metadata:
   name: continuum-workbench-isolation
   namespace: {{ .Values.continuum.clusterManager.workbench.namespace }}
   labels:
-    app.kubernetes.io/component: cluster-manager
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cluster-manager" "extra" .Values.continuum.clusterManager.labels.networkPolicy) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.clusterManager.annotations.networkPolicy)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   podSelector:
     matchLabels:

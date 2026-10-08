@@ -4,8 +4,11 @@ kind: Deployment
 metadata:
   name: {{ include "continuum-platform.feature-base.fullname" . }}
   labels:
-    app.kubernetes.io/component: feature-base
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "feature-base" "extra" .Values.continuum.featureBase.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.featureBase.annotations.deployment)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   {{- if not .Values.continuum.featureBase.autoscaling.enabled }}
   replicas: {{ .Values.continuum.featureBase.replicas | default 1 }}
@@ -21,9 +24,11 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: feature-base
-        {{- include "continuum-platform.selectorLabels" . | nindent 8 }}
-        {{- include "continuum-platform.labels" . | nindent 8 }}
+        {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "feature-base" "extra" .Values.continuum.featureBase.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.featureBase.annotations.pod)) }}
+      annotations:
+        {{- nindent 8 . }}
+      {{- end }}
     spec:
       securityContext:
         runAsNonRoot: true

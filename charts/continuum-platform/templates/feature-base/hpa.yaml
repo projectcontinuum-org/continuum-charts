@@ -4,8 +4,11 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "continuum-platform.feature-base.fullname" . }}
   labels:
-    app.kubernetes.io/component: feature-base
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "feature-base" "extra" .Values.continuum.featureBase.labels.hpa) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.featureBase.annotations.hpa)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

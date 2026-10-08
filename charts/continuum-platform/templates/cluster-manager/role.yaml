@@ -5,8 +5,11 @@ metadata:
   name: {{ include "continuum-platform.cluster-manager.fullname" . }}-workbench-manager
   namespace: {{ .Values.continuum.clusterManager.workbench.namespace }}
   labels:
-    app.kubernetes.io/component: cluster-manager
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cluster-manager" "extra" .Values.continuum.clusterManager.labels.role) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.clusterManager.annotations.role)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 rules:
   # Manage Deployments for workbench instances
   - apiGroups: ["apps"]

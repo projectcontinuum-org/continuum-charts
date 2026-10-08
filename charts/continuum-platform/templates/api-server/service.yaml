@@ -4,8 +4,11 @@ kind: Service
 metadata:
   name: {{ include "continuum-platform.api-server.fullname" . }}
   labels:
-    app.kubernetes.io/component: api-server
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "api-server" "extra" .Values.continuum.apiServer.labels.service) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.apiServer.annotations.service)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   type: ClusterIP
   ports:
