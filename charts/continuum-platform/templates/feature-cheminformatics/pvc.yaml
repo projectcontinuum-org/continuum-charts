@@ -4,8 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "continuum-platform.feature-cheminformatics.fullname" . }}-cache
   labels:
-    app.kubernetes.io/component: feature-cheminformatics
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "feature-cheminformatics" "extra" .Values.continuum.featureCheminformatics.labels.pvc) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.featureCheminformatics.annotations.pvc)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce" }}

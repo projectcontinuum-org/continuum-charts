@@ -4,8 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "continuum-platform.feature-base.fullname" . }}-cache
   labels:
-    app.kubernetes.io/component: feature-base
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "feature-base" "extra" .Values.continuum.featureBase.labels.pvc) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.featureBase.annotations.pvc)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.continuum.cacheStorage.accessMode | default "ReadWriteOnce" }}

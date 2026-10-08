@@ -4,8 +4,11 @@ kind: Deployment
 metadata:
   name: {{ include "continuum-platform.credentials-server.fullname" . }}
   labels:
-    app.kubernetes.io/component: credentials-server
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "credentials-server" "extra" .Values.continuum.credentialsServer.labels.deployment) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.credentialsServer.annotations.deployment)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   replicas: {{ .Values.continuum.credentialsServer.replicas | default 1 }}
   selector:
@@ -15,9 +18,11 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: credentials-server
-        {{- include "continuum-platform.selectorLabels" . | nindent 8 }}
-        {{- include "continuum-platform.labels" . | nindent 8 }}
+        {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "credentials-server" "extra" .Values.continuum.credentialsServer.labels.pod) | nindent 8 }}
+      {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.credentialsServer.annotations.pod)) }}
+      annotations:
+        {{- nindent 8 . }}
+      {{- end }}
     spec:
       securityContext:
         runAsNonRoot: true

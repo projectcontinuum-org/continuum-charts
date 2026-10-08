@@ -4,8 +4,11 @@ kind: Service
 metadata:
   name: {{ include "continuum-platform.orchestration-service.fullname" . }}
   labels:
-    app.kubernetes.io/component: orchestration-service
-    {{- include "continuum-platform.labels" . | nindent 4 }}
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "orchestration-service" "extra" .Values.continuum.orchestrationService.labels.service) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.orchestrationService.annotations.service)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
 spec:
   type: ClusterIP
   ports:
