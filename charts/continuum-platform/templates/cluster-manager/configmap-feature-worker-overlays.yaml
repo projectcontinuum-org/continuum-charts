@@ -1,0 +1,19 @@
+{{- if .Values.continuum.clusterManager.featureWorkers.overlays.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "continuum-platform.cluster-manager.fullname" . }}-feature-worker-overlays
+  labels:
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cluster-manager" "extra" .Values.continuum.clusterManager.labels.configMap) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.clusterManager.annotations.configMap)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+data:
+  {{- range $variant, $files := .Values.continuum.clusterManager.featureWorkers.overlays.variants }}
+  {{- range $filename, $content := $files }}
+  {{ $variant }}--{{ $filename }}: |
+    {{- $content | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}

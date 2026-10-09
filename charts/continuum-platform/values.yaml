@@ -275,6 +275,36 @@ continuum:
         #       metadata:
         #         annotations:
         #           service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    # Feature worker configuration — self-service, dynamically-managed Temporal
+    # worker Deployments (distinct from the static feature-base/feature-cheminformatics
+    # charts, which remain Helm-managed). Identified by managed-by=continuum-cluster-manager.
+    featureWorkers:
+      # Namespace where feature worker Deployments will be created
+      namespace: continuum-workbench
+      # Image pull policy for feature worker Deployments (Always, IfNotPresent, Never)
+      imagePullPolicy: IfNotPresent
+      # K8s resource overlay variants — named sets of YAML overlays that customize
+      # feature worker Deployment, PVC, and HPA manifests. Independently configured
+      # from the workbench overlays above. Overlay files are FreeMarker templates
+      # with access to: workerId, namespace, image, imagePullPolicy, taskQueue,
+      # replicas, cpuRequest, cpuLimit, memoryRequest, memoryLimit, storageSize,
+      # storageClassName, envVars.
+      overlays:
+        enabled: false
+        variants: {}
+        # Example — GPU feature worker variant:
+        # variants:
+        #   gpu-enabled:
+        #     deployment.yaml: |
+        #       spec:
+        #         template:
+        #           spec:
+        #             tolerations:
+        #               - key: "nvidia.com/gpu"
+        #                 operator: "Exists"
+        #                 effect: "NoSchedule"
+        #             nodeSelector:
+        #               accelerator: nvidia-tesla-v100
     resources:
       requests:
         cpu: 250m

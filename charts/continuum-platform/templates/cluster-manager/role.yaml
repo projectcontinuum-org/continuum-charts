@@ -43,5 +43,9 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
     verbs: ["create", "get", "list", "watch", "update", "patch", "delete", "deletecollection"]
+  # Manage HorizontalPodAutoscalers for feature worker autoscaling
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete", "deletecollection"]
 {{- end }}
 
