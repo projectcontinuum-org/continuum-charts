@@ -2,11 +2,13 @@
 
 This repository contains three Helm charts for deploying Project Continuum on Kubernetes, published as a standard Helm chart repository via GitHub Pages.
 
+Feature workers (e.g. `continuum-feature-base`, `continuum-feature-cheminformatics`, `continuum-feature-ai`, `continuum-feature-knime`) are **not** part of this repository — each lives in its own `continuum-feature-*` repo with its own standalone Helm chart, installable as an independent release into the same namespace as `continuum-infra` and `continuum-platform`. See [Feature worker charts](#feature-worker-charts) below.
+
 
 | Chart                | Description                                                                                                                            | Required |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | `continuum-infra`    | Core infrastructure services — PostgreSQL, Temporal, Kafka, Schema Registry, Kafka UI, Mosquitto, MinIO                               | Yes      |
-| `continuum-platform` | Application services — API Server, Orchestration Service, Message Bridge, Workbench, Feature Workers                                  | Yes      |
+| `continuum-platform` | Application services — API Server, Orchestration Service, Message Bridge, Workbench                                   | Yes      |
 | `continuum-sso`      | Optional Single Sign-On — OAuth2 Proxy with Keycloak OIDC                                                                              | No       |
 
 ## Helm Repository
@@ -166,19 +168,23 @@ In production, the base `values.yaml` configures Cassandra for high-throughput d
                         │  │  (UI)    │  │               │  │  Bridge  │ │
                         │  └──────────┘  └───────┬───────┘  └────┬─────┘ │
                         │                        │               │       │
-                        │  ┌─────────────────┐  ┌┴───────────┐   │       │
-                        │  │  Feature Base   │  │Orchestration│   │       │
-                        │  │     Worker      │  │  Service    │   │       │
-                        │  └────────┬────────┘  └──────┬─────┘   │       │
-                        │           │                  │         │       │
-                        │  ┌────────┴────────┐         │         │       │
-                        │  │ Feature Chemin- │         │         │       │
-                        │  │  informatics    │         │         │       │
-                        │  └────────┬────────┘         │         │       │
-                        └───────────┼──────────────────┼─────────┼───────┘
-                                    │                  │         │
-                        ┌───────────┼──────────────────┼─────────┼───────┐
-                        │           ▼     continuum-infra        ▼       │
+                        │                       ┌┴───────────┐   │       │
+                        │                       │Orchestration│   │       │
+                        │                       │  Service    │   │       │
+                        │                       └──────┬─────┘   │       │
+                        └──────────────────────────────┼─────────┼───────┘
+                                                         │         │
+                        ┌────────────────────────────────────────────────┐
+                        │  continuum-feature-* (standalone charts,        │
+                        │  installed separately into the same namespace) │
+                        │  ┌──────────┐  ┌──────────────┐  ┌──────────┐ │
+                        │  │ Feature  │  │   Feature     │  │ Feature  │ │
+                        │  │  Base    │  │Cheminformatics│  │ AI/KNIME │ │
+                        │  └────┬─────┘  └──────┬───────┘  └────┬─────┘ │
+                        └───────┼───────────────┼───────────────┼───────┘
+                                │               │               │
+                        ┌───────┼───────────────┼───────────────┼───────┐
+                        │       ▼     continuum-infra            ▼       │
                         │  ┌──────────────┐  ┌─────────┐  ┌───────────┐ │
                         │  │    Kafka      │  │Temporal │  │ Mosquitto │ │
                         │  │  (3-broker)   │  │(4 svcs) │  │  (MQTT)   │ │
@@ -530,17 +536,37 @@ kubectl delete namespace continuum
 
 ## Customization
 
+### Feature worker charts
+
+Feature workers are standalone Helm charts, each published from its own `continuum-feature-*` repo. Install them as independent releases into the same namespace as `continuum-infra` and `continuum-platform`:
+
+```bash
+helm repo add continuum-feature-base https://projectcontinuum.github.io/continuum-feature-base
+helm repo add continuum-feature-cheminformatics https://projectcontinuum.github.io/continuum-feature-cheminformatics
+helm repo add continuum-feature-ai https://projectcontinuum.github.io/continuum-feature-ai
+helm repo add continuum-feature-knime https://projectcontinuum.github.io/continuum-feature-knime
+helm repo update
+
+helm install continuum-feature-base continuum-feature-base/continuum-feature-base \
+  -n continuum \
+  --wait --timeout 10m
+```
+
+Each chart defaults to pointing at `continuum-infra` and `continuum-platform` installed under their default release names. If either was installed under a different release name, override the feature chart's `continuum.infra.*`, `continuum.apiServer.*`, and `continuum.secrets.existingMinioSecret` values accordingly — see each feature chart's own README/NOTES for details.
+
 ### Scaling feature workers
 
-Feature workers support horizontal pod autoscaling:
+Each standalone feature chart supports horizontal pod autoscaling via its own values:
 
 ```yaml
-featureBase:
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 20
-    targetCPUUtilizationPercentage: 70
+# e.g. continuum-feature-base's values
+continuum:
+  featureBase:
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 20
+      targetCPUUtilizationPercentage: 70
 ```
 
 ### Using an external database
