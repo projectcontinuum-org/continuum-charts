@@ -118,14 +118,6 @@ tcp://{{ .Values.continuum.infra.mosquitto.host }}:{{ .Values.continuum.infra.mo
 {{- include "continuum-platform.fullname" . -}}-message-bridge
 {{- end }}
 
-{{- define "continuum-platform.feature-base.fullname" -}}
-{{- include "continuum-platform.fullname" . -}}-feature-base
-{{- end }}
-
-{{- define "continuum-platform.feature-cheminformatics.fullname" -}}
-{{- include "continuum-platform.fullname" . -}}-feature-cheminformatics
-{{- end }}
-
 {{- define "continuum-platform.cluster-manager.fullname" -}}
 {{- include "continuum-platform.fullname" . -}}-cluster-manager
 {{- end }}
