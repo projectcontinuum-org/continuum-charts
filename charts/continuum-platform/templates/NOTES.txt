@@ -6,8 +6,6 @@ Components:
   - API Server
   - Orchestration Service
   - Message Bridge
-  - Feature Base Worker
-  - Feature Cheminformatics Worker
 
 To verify the deployment:
 
