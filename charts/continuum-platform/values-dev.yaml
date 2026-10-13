@@ -61,7 +61,7 @@ continuum:
     replicas: 1
     workbench:
       namespace: continuum-dev
-      defaultImage: projectcontinuum/continuum-workbench:0.0.5
+      defaultImage: projectcontinuum/continuum-workbench:0.0.12
       imagePullPolicy: Always
     resources:
       requests:
