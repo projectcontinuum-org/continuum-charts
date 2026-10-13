@@ -4,7 +4,7 @@
 global:
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
-  continuumPlatformVersion: "0.0.15"
+  continuumPlatformVersion: "0.0.19"
 
   # Image used by all init containers (wait-for-* readiness checks).
   # Override repository and/or tag to pull from a private registry mirror.
