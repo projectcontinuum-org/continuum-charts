@@ -4,7 +4,7 @@
 global:
   imagePullPolicy: IfNotPresent
   imagePullSecrets: []
-  continuumPlatformVersion: "0.0.19"
+  continuumPlatformVersion: "0.0.20"
 
   # Image used by all init containers (wait-for-* readiness checks).
   # Override repository and/or tag to pull from a private registry mirror.
@@ -235,6 +235,14 @@ continuum:
         stripPrefixes:
           - /api-server
           - /credentials-manager
+      # Single, shared Traefik ForwardAuth middleware (requires traefik.io CRDs on the cluster).
+      # Checks x-continuum-user-id (and the X-Forwarded-Host Traefik sets automatically) against
+      # cluster-manager's GET /api/v1/workbench/authorize before a request reaches a workbench pod.
+      # cluster-manager itself never references this middleware — wiring any given workbench's
+      # Ingress to it (via the `traefik.ingress.kubernetes.io/router.middlewares` annotation) is
+      # left to whichever ingress overlay an environment chooses to use.
+      auth:
+        enabled: false
       overlays:
         enabled: false
         variants: {}
@@ -294,6 +302,7 @@ continuum:
       roleBinding: {}
       configMap: {}
       middleware: {}
+      authMiddleware: {}
       networkPolicy: {}
     annotations:
       deployment: {}
@@ -304,6 +313,7 @@ continuum:
       roleBinding: {}
       configMap: {}
       middleware: {}
+      authMiddleware: {}
       networkPolicy: {}
 
   # ============================================================
