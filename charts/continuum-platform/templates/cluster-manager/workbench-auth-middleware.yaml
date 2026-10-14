@@ -1,0 +1,16 @@
+{{- if and .Values.continuum.clusterManager.enabled .Values.continuum.clusterManager.workbench.auth.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: workbench-forward-auth
+  namespace: {{ .Values.continuum.clusterManager.workbench.namespace }}
+  labels:
+    {{- include "continuum-platform.componentLabels" (dict "context" $ "component" "cluster-manager" "extra" .Values.continuum.clusterManager.labels.authMiddleware) | nindent 4 }}
+  {{- with (include "continuum-platform.componentAnnotations" (dict "context" $ "extra" .Values.continuum.clusterManager.annotations.authMiddleware)) }}
+  annotations:
+    {{- nindent 4 . }}
+  {{- end }}
+spec:
+  forwardAuth:
+    address: "http://{{ include "continuum-platform.cluster-manager.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.continuum.clusterManager.service.port | default 8080 }}/api/v1/workbench/authorize"
+{{- end }}
