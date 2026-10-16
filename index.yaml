@@ -3,6 +3,41 @@ entries:
   continuum-infra:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2026-10-16T10:39:42.181930578Z"
+    dependencies:
+    - condition: temporal.enabled
+      name: temporal
+      repository: https://go.temporal.io/helm-charts/
+      version: '>=1.0.0-0'
+    - condition: cassandra.enabled
+      name: cassandra
+      repository: https://charts.bitnami.com/bitnami
+      version: ~12.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: ~22.x
+    description: Core infrastructure services for Project Continuum — Temporal, Kafka,
+      PostgreSQL, MinIO, Mosquitto
+    digest: 11eb961520ab5fdafbdd1a054a1a4ef02eda26bdc45d7cbd5b8db5696515d726
+    home: https://github.com/projectcontinuum
+    keywords:
+    - continuum
+    - infrastructure
+    - temporal
+    - kafka
+    - postgresql
+    - minio
+    - mosquitto
+    maintainers:
+    - name: Project Continuum
+    name: continuum-infra
+    type: application
+    urls:
+    - https://github.com/projectcontinuum-org/continuum-charts/releases/download/continuum-infra-0.1.3/continuum-infra-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2026-10-07T12:02:07.090500475Z"
     dependencies:
     - condition: temporal.enabled
@@ -107,6 +142,26 @@ entries:
     - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-infra-0.1.0/continuum-infra-0.1.0.tgz
     version: 0.1.0
   continuum-platform:
+  - annotations:
+      continuum.io/requires: continuum-infra >= 0.1.0
+    apiVersion: v2
+    appVersion: 0.0.20
+    created: "2026-10-16T10:39:42.442392587Z"
+    description: Project Continuum application services — API server, orchestration,
+      workbench
+    digest: c9c105d29495ac8785c405359f28eb7eea9fabb1f5460e2c3a108a2260a83565
+    home: https://github.com/projectcontinuum
+    keywords:
+    - continuum
+    - workflow
+    - platform
+    maintainers:
+    - name: Project Continuum
+    name: continuum-platform
+    type: application
+    urls:
+    - https://github.com/projectcontinuum-org/continuum-charts/releases/download/continuum-platform-0.2.3/continuum-platform-0.2.3.tgz
+    version: 0.2.3
   - annotations:
       continuum.io/requires: continuum-infra >= 0.1.0
     apiVersion: v2
@@ -227,4 +282,4 @@ entries:
     urls:
     - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-platform-0.1.0/continuum-platform-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-14T11:18:30.036513974Z"
+generated: "2026-10-16T10:39:42.442425364Z"
