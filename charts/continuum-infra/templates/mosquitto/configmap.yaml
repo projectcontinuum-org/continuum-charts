@@ -13,7 +13,7 @@ data:
   mosquitto.conf: |
     persistence {{ .Values.continuum.mosquitto.config.persistence }}
     persistence_location /mosquitto/data/
-    log_dest file /mosquitto/log/mosquitto.log
+    log_dest stdout
 
     listener {{ .Values.continuum.mosquitto.config.tcpPort | default 1883 }}
     listener {{ .Values.continuum.mosquitto.config.websocketPort | default 1884 }}
