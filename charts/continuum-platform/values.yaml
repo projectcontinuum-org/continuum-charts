@@ -226,7 +226,13 @@ continuum:
       # Overlay files are FreeMarker templates with access to: instanceId, namespace,
       # userId, image, imagePullPolicy, cpuRequest, cpuLimit, memoryRequest,
       # memoryLimit, storageSize, storageClassName.
-      # Traefik middleware for path stripping (requires traefik.io CRDs on the cluster)
+      # Traefik middlewares (require traefik.io CRDs on the cluster). Both the
+      # path-stripping middleware below and the "workbench-forward-auth" ForwardAuth
+      # middleware (checks x-continuum-user-id against cluster-manager's
+      # GET /api/v1/workbench/authorize) are created when this is enabled.
+      # cluster-manager never wires either middleware into a workbench's Ingress itself —
+      # that's left to whichever ingress overlay an environment chooses to use, via the
+      # `traefik.ingress.kubernetes.io/router.middlewares` annotation.
       middleware:
         enabled: false
         # Context-path prefixes to strip before forwarding to backends.
@@ -235,14 +241,6 @@ continuum:
         stripPrefixes:
           - /api-server
           - /credentials-manager
-      # Single, shared Traefik ForwardAuth middleware (requires traefik.io CRDs on the cluster).
-      # Checks x-continuum-user-id (and the X-Forwarded-Host Traefik sets automatically) against
-      # cluster-manager's GET /api/v1/workbench/authorize before a request reaches a workbench pod.
-      # cluster-manager itself never references this middleware — wiring any given workbench's
-      # Ingress to it (via the `traefik.ingress.kubernetes.io/router.middlewares` annotation) is
-      # left to whichever ingress overlay an environment chooses to use.
-      auth:
-        enabled: false
       overlays:
         enabled: false
         variants: {}
