@@ -14,7 +14,7 @@ data:
     persistence {{ .Values.continuum.mosquitto.config.persistence }}
     persistence_location /mosquitto/data/
     log_dest stdout
-
+    websockets_headers_size 16384
     listener {{ .Values.continuum.mosquitto.config.tcpPort | default 1883 }}
     listener {{ .Values.continuum.mosquitto.config.websocketPort | default 1884 }}
     protocol websockets
