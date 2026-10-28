@@ -14,7 +14,7 @@ keywords:
   - mosquitto
 maintainers:
   - name: Project Continuum
-home: https://github.com/projectcontinuum
+home: https://github.com/projectcontinuum-org
 
 dependencies:
   - name: temporal
