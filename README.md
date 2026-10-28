@@ -659,3 +659,7 @@ For KRaft mode, ensure the `clusterId` has not changed between deployments. Chec
 ```bash
 kubectl logs -n continuum continuum-infra-kafka-0
 ```
+
+## License
+
+[Apache 2.0](LICENSE)
