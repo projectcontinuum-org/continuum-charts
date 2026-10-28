@@ -3,6 +3,41 @@ entries:
   continuum-infra:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2026-10-28T04:28:16.207244962Z"
+    dependencies:
+    - condition: temporal.enabled
+      name: temporal
+      repository: https://go.temporal.io/helm-charts/
+      version: '>=1.0.0-0'
+    - condition: cassandra.enabled
+      name: cassandra
+      repository: https://charts.bitnami.com/bitnami
+      version: ~12.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: ~22.x
+    description: Core infrastructure services for Project Continuum — Temporal, Kafka,
+      PostgreSQL, MinIO, Mosquitto
+    digest: a95f3dac0c98acb024a6c57d3e2812bd6e4c6754e50c368db4250b39d781559a
+    home: https://github.com/projectcontinuum-org
+    keywords:
+    - continuum
+    - infrastructure
+    - temporal
+    - kafka
+    - postgresql
+    - minio
+    - mosquitto
+    maintainers:
+    - name: Project Continuum
+    name: continuum-infra
+    type: application
+    urls:
+    - https://github.com/projectcontinuum-org/continuum-charts/releases/download/continuum-infra-0.1.5/continuum-infra-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2026-10-20T08:18:33.948712516Z"
     dependencies:
     - condition: temporal.enabled
@@ -181,6 +216,26 @@ entries:
       continuum.io/requires: continuum-infra >= 0.1.0
     apiVersion: v2
     appVersion: 0.0.20
+    created: "2026-10-28T04:28:16.41232466Z"
+    description: Project Continuum application services — API server, orchestration,
+      workbench
+    digest: dc20096dcc0c13bb5108694e7d7abe69a1d660d0cdd2526dacd30eea592c0ebb
+    home: https://github.com/projectcontinuum-org
+    keywords:
+    - continuum
+    - workflow
+    - platform
+    maintainers:
+    - name: Project Continuum
+    name: continuum-platform
+    type: application
+    urls:
+    - https://github.com/projectcontinuum-org/continuum-charts/releases/download/continuum-platform-0.2.4/continuum-platform-0.2.4.tgz
+    version: 0.2.4
+  - annotations:
+      continuum.io/requires: continuum-infra >= 0.1.0
+    apiVersion: v2
+    appVersion: 0.0.20
     created: "2026-10-16T10:39:42.442392587Z"
     description: Project Continuum application services — API server, orchestration,
       workbench
@@ -317,4 +372,4 @@ entries:
     urls:
     - https://github.com/projectcontinuum/continuum-charts/releases/download/continuum-platform-0.1.0/continuum-platform-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-20T08:18:33.948730673Z"
+generated: "2026-10-28T04:28:16.412363669Z"
