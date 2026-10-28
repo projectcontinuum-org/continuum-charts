@@ -18,7 +18,7 @@ This repository is published as a Helm chart repository via GitHub Pages.
 ### Add the repository
 
 ```bash
-helm repo add continuum https://projectcontinuum.github.io/continuum-charts
+helm repo add continuum https://projectcontinuum-org.github.io/continuum-charts
 helm repo update
 ```
 
@@ -50,7 +50,7 @@ In your chart's `Chart.yaml`:
 dependencies:
   - name: continuum-infra
     version: ">=0.1.0"
-    repository: "https://projectcontinuum.github.io/continuum-charts"
+    repository: "https://projectcontinuum-org.github.io/continuum-charts"
 ```
 
 Then run:
@@ -83,7 +83,7 @@ kubectl create namespace continuum-dev
 kubectl create namespace continuum-workbench-dev
 
 # Add the Helm repository
-helm repo add continuum https://projectcontinuum.github.io/continuum-charts
+helm repo add continuum https://projectcontinuum-org.github.io/continuum-charts
 helm repo update
 
 # Install infrastructure (PostgreSQL, Temporal, Kafka, MinIO, Mosquitto)
@@ -106,7 +106,7 @@ kubectl get pods -n continuum-dev
 
 ```bash
 # Clone the repo
-git clone https://github.com/projectcontinuum/continuum-charts.git
+git clone https://github.com/projectcontinuum-org/continuum-charts.git
 cd continuum-charts
 
 # Start minikube (4 CPUs, 8GB RAM recommended)
@@ -541,10 +541,10 @@ kubectl delete namespace continuum
 Feature workers are standalone Helm charts, each published from its own `continuum-feature-*` repo. Install them as independent releases into the same namespace as `continuum-infra` and `continuum-platform`:
 
 ```bash
-helm repo add continuum-feature-base https://projectcontinuum.github.io/continuum-feature-base
-helm repo add continuum-feature-cheminformatics https://projectcontinuum.github.io/continuum-feature-cheminformatics
-helm repo add continuum-feature-ai https://projectcontinuum.github.io/continuum-feature-ai
-helm repo add continuum-feature-knime https://projectcontinuum.github.io/continuum-feature-knime
+helm repo add continuum-feature-base https://projectcontinuum-org.github.io/continuum-feature-base
+helm repo add continuum-feature-cheminformatics https://projectcontinuum-org.github.io/continuum-feature-cheminformatics
+helm repo add continuum-feature-ai https://projectcontinuum-org.github.io/continuum-feature-ai
+helm repo add continuum-feature-knime https://projectcontinuum-org.github.io/continuum-feature-knime
 helm repo update
 
 helm install continuum-feature-base continuum-feature-base/continuum-feature-base \
