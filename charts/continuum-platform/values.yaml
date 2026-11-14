@@ -217,6 +217,16 @@ continuum:
       defaultImage: projectcontinuum/continuum-workbench:latest
       # Image pull policy for workbench instances (Always, IfNotPresent, Never)
       imagePullPolicy: IfNotPresent
+      # Image repositories a workbench create/update request may name, so a caller of the cluster-manager API cannot
+      # run an arbitrary image in the workbench namespace. An entry matches the image itself or anything below it
+      # (projectcontinuum/continuum-workbench matches projectcontinuum/continuum-workbench:0.0.14; a trailing "/"
+      # matches a whole registry path, e.g. ghcr.io/acme/). Docker Hub short names are normalised.
+      #   - commented out / unset (default): the cluster-manager only accepts its own workbench image repository
+      #   - a list: exactly those repositories
+      #   - []   : NO restriction, any valid image is accepted. Only where every caller of the API is trusted.
+      # allowedImagePrefixes:
+      #   - projectcontinuum/continuum-workbench
+      #   - registry.example.com/team/workbench
       # K8s resource overlay variants — named sets of YAML overlays that customize
       # workbench Deployment, Service, PVC, and Ingress manifests.
       # Users select a variant when creating a workbench; the selected variant's
