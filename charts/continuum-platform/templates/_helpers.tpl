@@ -122,10 +122,6 @@ tcp://{{ .Values.continuum.infra.mosquitto.host }}:{{ .Values.continuum.infra.mo
 {{- include "continuum-platform.fullname" . -}}-cluster-manager
 {{- end }}
 
-{{- define "continuum-platform.cloud-gateway.fullname" -}}
-{{- include "continuum-platform.fullname" . -}}-cloud-gateway
-{{- end }}
-
 {{- define "continuum-platform.credentials-server.fullname" -}}
 {{- include "continuum-platform.fullname" . -}}-credentials-server
 {{- end }}

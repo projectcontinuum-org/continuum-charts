@@ -79,6 +79,12 @@ spec:
               value: {{ .Values.continuum.clusterManager.workbench.namespace | quote }}
             - name: WORKBENCH_IMAGE_PULL_POLICY
               value: {{ .Values.continuum.clusterManager.workbench.imagePullPolicy | default "IfNotPresent" | quote }}
+            {{- /* Unset: the cluster-manager's own default. A list: those repositories. []: no restriction. See values.yaml. */}}
+            {{- $allowed := .Values.continuum.clusterManager.workbench.allowedImagePrefixes }}
+            {{- if kindIs "slice" $allowed }}
+            - name: WORKBENCH_ALLOWED_IMAGE_PREFIXES
+              value: {{ join "," $allowed | quote }}
+            {{- end }}
             {{- if .Values.continuum.clusterManager.workbench.overlays.enabled }}
             - name: OVERLAY_ENABLED
               value: "true"

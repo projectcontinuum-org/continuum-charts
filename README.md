@@ -91,7 +91,7 @@ helm install continuum-infra continuum/continuum-infra \
   -n continuum-dev \
   --wait --timeout 15m
 
-# Install platform (Cloud Gateway, API Server, Cluster Manager, Workers)
+# Install platform (API Server, Orchestration, Cluster Manager, Credentials Server, Message Bridge)
 helm install continuum-platform continuum/continuum-platform \
   -n continuum-dev \
   --wait --timeout 10m
@@ -125,7 +125,7 @@ helm install continuum-infra ./charts/continuum-infra \
   -f charts/continuum-infra/values-dev.yaml \
   --wait --timeout 15m
 
-# Install platform (Cloud Gateway, API Server, Cluster Manager, Workers)
+# Install platform (API Server, Orchestration, Cluster Manager, Credentials Server, Message Bridge)
 helm install continuum-platform ./charts/continuum-platform \
   -n continuum-dev \
   -f charts/continuum-platform/values-dev.yaml \
@@ -135,13 +135,15 @@ helm install continuum-platform ./charts/continuum-platform \
 kubectl get pods -n continuum-dev
 ```
 
-Once all pods are `Running`, port-forward the Cloud Gateway:
+Once all pods are `Running`, port-forward the Cluster Manager (the chart has no single entry point; each service has its own ClusterIP Service):
 
 ```bash
-kubectl port-forward svc/continuum-platform-cloud-gateway 8080:8080 -n continuum-dev
+kubectl port-forward svc/continuum-platform-cluster-manager 8082:8080 -n continuum-dev
 ```
 
-Open the UI in your browser: **http://localhost:8080/cluster-manager/ui/**
+Open the UI in your browser: **http://localhost:8082/ui/**
+
+The API server (`svc/continuum-platform-api-server`) and the credentials server (`svc/continuum-platform-credentials-server`, UI at `/ui/`) are reached the same way. To expose them under one host, put your own ingress or reverse proxy in front of the Services.
 
 ## Dev vs Production Temporal Backend
 
