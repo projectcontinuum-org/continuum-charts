@@ -1,20 +1,26 @@
 Continuum Platform has been deployed.
 
 Components:
-  - Cloud Gateway (reverse proxy / single entry point)
   - Cluster Manager (workbench lifecycle)
   - API Server
   - Orchestration Service
   - Message Bridge
+  - Credentials Server
 
 To verify the deployment:
 
   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
 
-Access the platform:
+Access the platform. There is no single entry point in this chart: each service has its own ClusterIP Service, so
+port-forward the one you need, or put your own ingress / reverse proxy in front of them.
 
-  # Cloud Gateway (single entry point)
-  kubectl port-forward svc/{{ include "continuum-platform.cloud-gateway.fullname" . }} 8080:8080 -n {{ .Release.Namespace }}
+  # Cluster Manager (workbench lifecycle API and UI)
+  kubectl port-forward svc/{{ include "continuum-platform.cluster-manager.fullname" . }} 8082:8080 -n {{ .Release.Namespace }}
+  # Open the UI: http://localhost:8082/ui/
 
-  # Open the UI
-  # http://localhost:8080/cluster-manager/ui/
+  # API Server (workflow API, node registry)
+  kubectl port-forward svc/{{ include "continuum-platform.api-server.fullname" . }} 8080:8080 -n {{ .Release.Namespace }}
+
+  # Credentials Server (credential API and UI)
+  kubectl port-forward svc/{{ include "continuum-platform.credentials-server.fullname" . }} 8083:8080 -n {{ .Release.Namespace }}
+  # Open the UI: http://localhost:8083/ui/
