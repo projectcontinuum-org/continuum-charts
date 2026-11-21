@@ -81,6 +81,20 @@ continuum:
       minio: {}
 
   # ============================================================
+  # OpenAPI documentation (springdoc) of api-server, credentials-server and cluster-manager
+  # ============================================================
+  # Off in production: /v3/api-docs and /swagger-ui/** answer 404 (CONTINUUM_API_DOCS_ENABLED=false). Continuum has no
+  # authentication of its own, so the docs cannot be put behind a login here; anyone who reaches a service could read
+  # them. Enable them only where the services are reachable just by trusted users (dev/staging), e.g.:
+  #   helm upgrade continuum-platform ... --set continuum.apiDocs.enabled=true
+  # The committed specs in continuum-platform-core/docs/api/*.openapi.yaml are the reference without a running server.
+  apiDocs:
+    enabled: false
+    # Also serve the "internal" group (api-server admin endpoints, cluster-manager ForwardAuth) at /v3/api-docs/internal.
+    # Only has an effect when enabled is true.
+    internalGroupEnabled: false
+
+  # ============================================================
   # Storage configuration (S3/MinIO)
   # ============================================================
   storage:

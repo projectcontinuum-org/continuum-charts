@@ -126,4 +126,13 @@ tcp://{{ .Values.continuum.infra.mosquitto.host }}:{{ .Values.continuum.infra.mo
 {{- include "continuum-platform.fullname" . -}}-credentials-server
 {{- end }}
 
-
+{{/*
+OpenAPI docs switches (springdoc) shared by api-server, credentials-server and cluster-manager.
+Off unless continuum.apiDocs.enabled is true; see values.yaml.
+*/}}
+{{- define "continuum-platform.apiDocs.env" -}}
+- name: CONTINUUM_API_DOCS_ENABLED
+  value: {{ (.Values.continuum.apiDocs).enabled | default false | quote }}
+- name: CONTINUUM_API_DOCS_INTERNAL_ENABLED
+  value: {{ (.Values.continuum.apiDocs).internalGroupEnabled | default false | quote }}
+{{- end }}

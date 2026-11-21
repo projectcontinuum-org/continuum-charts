@@ -60,6 +60,7 @@ spec:
               name: http
               protocol: TCP
           env:
+            {{- include "continuum-platform.apiDocs.env" . | nindent 12 }}
             - name: CONTINUUM_DB_URL
               value: {{ include "continuum-platform.infra.db.url" . | quote }}
             - name: CONTINUUM_DB_USERNAME

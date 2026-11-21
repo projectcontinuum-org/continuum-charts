@@ -123,6 +123,7 @@ spec:
               value: {{ .Values.continuum.storage.bucketRegion | quote }}
             - name: CONTINUUM_CACHE_BUCKET_BASE_PATH
               value: {{ .Values.continuum.storage.bucketBasePath | quote }}
+            {{- include "continuum-platform.apiDocs.env" . | nindent 12 }}
             - name: CONTINUUM_DB_URL
               value: {{ include "continuum-platform.infra.db.url" . | quote }}
             - name: CONTINUUM_DB_USERNAME
