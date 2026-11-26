@@ -505,6 +505,13 @@ kubectl exec -n continuum deploy/continuum-platform-api-server -- \
 
 ## Upgrading
 
+> [!IMPORTANT]
+> **Upgrading to platform 0.0.23 (`continuum-platform` chart `appVersion: 0.0.23`): upgrade the feature workers too.**
+> - Workers built against platform 0.0.22 or older fail every node against a 0.0.23 orchestration service. Upgrade each `continuum-feature-*` release to a version built against `continuumPlatformVersion=0.0.23`, **before** upgrading `continuum-platform`.
+> - **There is no mixed-version mode.** Every node exports default flow variables from 0.0.23 on, so every workflow carries the `$variable` key. A worker older than 0.0.23 tries to download that key from S3 and fails every node that has an upstream node.
+>
+> See the [platform 0.0.23 upgrade notes](https://github.com/projectcontinuum-org/continuum-platform-core/blob/main/release_notes/RELEASE_NOTES_v0.0.23.md#upgrade-notes).
+
 ```bash
 # Update infrastructure (from source)
 helm upgrade continuum-infra ./charts/continuum-infra \

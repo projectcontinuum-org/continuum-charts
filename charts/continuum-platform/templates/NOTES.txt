@@ -1,5 +1,10 @@
 Continuum Platform has been deployed.
 
+Platform version: {{ .Chart.AppVersion }}
+Feature workers must be built against the same platform version. From 0.0.23 on, a worker built against
+0.0.22 or older fails every node (every node now passes default flow variables downstream). Upgrade every
+continuum-feature-* release before or together with this chart.
+
 Components:
   - Cluster Manager (workbench lifecycle)
   - API Server
